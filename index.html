@@ -411,7 +411,7 @@
     <div class="modal-box" style="border: 1px solid var(--purple); padding: 25px 20px; text-align: left; max-height: 85vh; overflow-y: auto;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="font-family: 'Pacifico', cursive; color: var(--danger); margin: 0; font-size: 28px;">keuanganNila</h2>
-            <small style="color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">VERSI 2.0 (FINAL BUILD)</small>
+            <small id="app-version-display" style="color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">VERSI 2.0 (FINAL BUILD)</small>
         </div>
 
         <div style="font-size: 13px; line-height: 1.6; color: var(--text-light);">
@@ -500,6 +500,7 @@
     // =========================================================
     // 1. PENGATURAN AWAL & DATABASE 
     // =========================================================
+    const APP_VERSION = "2.0"; // UBAH ANGKA INI JIKA ADA UPDATE
     const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwxWObSeHMkVY35j6im5CQ56tA-VaBxw7Aru3bDlyEztB5niOiy6kaCLmljMDhTH025/exec";
 
     if ('serviceWorker' in navigator) {
@@ -1177,7 +1178,12 @@
     function setPickerDate() { const y = Picker.sel.getFullYear(), m = String(Picker.sel.getMonth() + 1).padStart(2, '0'), d = String(Picker.sel.getDate()).padStart(2, '0'), el = document.getElementById(Picker.targetId); if (Picker.mode === 'date') { const ymd = `${y}-${m}-${d}`; el.dataset.rawDate = ymd; el.value = Utils.formatTglTampil(ymd); } else { const ym = `${y}-${m}`; el.dataset.rawDate = ym; el.value = `${BlnPdk[Picker.sel.getMonth()]} ${y}`; } closePicker(); if (Picker.targetId === 'rekap-date-picker') updateRekap(); if (Picker.targetId === 'plot-month-filter') updatePlotList(); }
     function renderKalender() { if (Picker.mode === 'date') { document.getElementById('cp-title').innerText = `${NamaBln[Picker.curr.getMonth()]} ${Picker.curr.getFullYear()}`; const wadah = document.getElementById('cp-grid-days'); let h = ''; const h1 = new Date(Picker.curr.getFullYear(), Picker.curr.getMonth(), 1).getDay(), tot = new Date(Picker.curr.getFullYear(), Picker.curr.getMonth() + 1, 0).getDate(); for (let i = 0; i < h1; i++) h += `<div class="picker-item empty"></div>`; for (let i = 1; i <= tot; i++) { const isS = (i === Picker.sel.getDate() && Picker.curr.getMonth() === Picker.sel.getMonth() && Picker.curr.getFullYear() === Picker.sel.getFullYear()); h += `<div class="picker-item ${isS ? 'selected' : ''}" style="${isS ? `background:${Picker.theme};` : ''}" onclick="cpSelectDay(${i})">${i}</div>`; } wadah.innerHTML = h; } else { document.getElementById('cp-title').innerText = `${Picker.curr.getFullYear()}`; const wadah = document.getElementById('cp-month-view'); let h = ''; for (let i = 0; i < 12; i++) { const isS = (i === Picker.sel.getMonth() && Picker.curr.getFullYear() === Picker.sel.getFullYear()); h += `<div class="picker-item ${isS ? 'selected' : ''}" style="${isS ? `background:${Picker.theme};` : ''}" onclick="cpSelectMonth(${i})">${BlnPdk[i]}</div>`; } wadah.innerHTML = h; } }
 
-    window.addEventListener('DOMContentLoaded', () => { muatDatabase(); inisiasiKalenderAwal(); updatePlotList(); updateRekap(); updateWalletDropdownBalances(); jalankanJam(); });
+    function terapkanVersi() {
+        const elVersi = document.getElementById('app-version-display');
+        if (elVersi) elVersi.innerText = `VERSI ${APP_VERSION} (FINAL BUILD)`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { muatDatabase(); inisiasiKalenderAwal(); updatePlotList(); updateRekap(); updateWalletDropdownBalances(); jalankanJam(); terapkanVersi(); });
 </script>
 </body>
 </html>
