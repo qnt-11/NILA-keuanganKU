@@ -1,10 +1,12 @@
-const CACHE_NAME = 'keuangan-nila-v4';
+const CACHE_NAME = 'keuangan-nila-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
     './icon-192.png',
-    './icon-512.png'
+    './icon-512.png',
+    'https://cdn.jsdelivr.net/npm/chart.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
 self.addEventListener('install', event => {
