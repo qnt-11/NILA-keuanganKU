@@ -578,6 +578,26 @@
         }
     };
 
+    function getSaldoDompet(namaDompet) {
+        let totalMasuk = 0;
+        let totalKeluar = 0;
+
+        AppState.db.income.forEach(i => {
+            if (i.wallet === namaDompet) totalMasuk += i.amount;
+        });
+
+        AppState.db.expense.forEach(e => {
+            if (e.wallet === namaDompet) totalKeluar += e.amount;
+        });
+
+        AppState.db.mutations.forEach(m => {
+            if (m.to === namaDompet) totalMasuk += m.amount; 
+            if (m.from === namaDompet) totalKeluar += m.amount; 
+        });
+
+        return totalMasuk - totalKeluar;
+    }
+
     ['in-amount', 'out-amount', 'plot-amount', 'mut-amount', 'edit-amount'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', Utils.formatRibuanInput);
@@ -1009,13 +1029,28 @@
     function clearSearch() { document.getElementById('rekap-search').value = ''; updateRekap(); }
 
     function updateRekap() {
-        const tglSortir = document.getElementById('rekap-date-picker').dataset.rawDate, kunciRaw = document.getElementById('rekap-search').value.toLowerCase().trim(), kunciBersih = kunciRaw.replace(/\./g, '');
-        const elMasuk = document.getElementById('list-income'), elKeluar = document.getElementById('list-expense');
-        if (kunciRaw) { document.getElementById('rekap-focus-hide').classList.add('hidden'); document.getElementById('clear-search-btn').classList.remove('hidden'); } 
-        else { document.getElementById('rekap-focus-hide').classList.remove('hidden'); document.getElementById('clear-search-btn').classList.add('hidden'); }
-        const gabungan = [...AppState.db.income.map(i => ({...i, type:'income'})), ...AppState.db.expense.map(e => ({...e, type:'expense'})), ...AppState.db.mutations.map(m => ({...m, type:'mutations', desc:`Mutasi: ${m.from} ➔ ${m.to}`}))]
-            .filter(item => kunciRaw ? (item.desc.toLowerCase().includes(kunciRaw) || item.amount.toString().includes(kunciBersih)) : item.date === tglSortir);
-        let htmlMasuk = '', htmlKeluar = ''; let countIn = 0, countOut = 0;
+        const tglSortir = document.getElementById('rekap-date-picker').dataset.rawDate, 
+              kunciRaw = document.getElementById('rekap-search').value.toLowerCase().trim(), 
+              kunciBersih = kunciRaw.replace(/\./g, '');
+        const elMasuk = document.getElementById('list-income'), 
+              elKeluar = document.getElementById('list-expense');
+              
+        if (kunciRaw) { 
+            document.getElementById('rekap-focus-hide').classList.add('hidden'); 
+            document.getElementById('clear-search-btn').classList.remove('hidden'); 
+        } else { 
+            document.getElementById('rekap-focus-hide').classList.remove('hidden'); 
+            document.getElementById('clear-search-btn').classList.add('hidden'); 
+        }
+        
+        const gabungan = [
+            ...AppState.db.income.map(i => ({...i, type:'income'})), 
+            ...AppState.db.expense.map(e => ({...e, type:'expense'})), 
+            ...AppState.db.mutations.map(m => ({...m, type:'mutations', desc:`Mutasi: ${m.from} ➔ ${m.to}`}))
+        ].filter(item => kunciRaw ? (item.desc.toLowerCase().includes(kunciRaw) || item.amount.toString().includes(kunciBersih)) : item.date === tglSortir);
+        
+        let htmlMasuk = '', htmlKeluar = ''; 
+        
         gabungan.forEach(item => {
             const isIn = item.type === 'income', isMut = item.type === 'mutations';
             const barisHTML = `<li><div class="editable" onclick="editData('${item.type}','${item.id}')"><div style="font-size:12px; font-weight:600; word-wrap: break-word; line-height:1.3; margin-bottom: 3px;">
@@ -1023,19 +1058,26 @@
                 <div style="font-size:11px; font-weight:700;" class="${isMut ? 'mutasi-text' : (isIn ? 'income-text' : 'expense-text')}">
                 ${isMut ? '⇄' : (isIn ? '+' : '-')} ${Utils.formatRp(item.amount)} <br><small style="color:var(--text-muted); font-weight:500; font-size: 9px;">(${isMut ? 'Transfer' : item.wallet})</small></div></div>
                 <div onclick="deleteItem(event, '${item.type}','${item.id}')" style="padding-left: 6px;"><svg class="svg-x" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div></li>`;
-            if (isIn) { htmlMasuk += barisHTML; countIn++; } else { htmlKeluar += barisHTML; countOut++; }
+            
+            if (isIn) { htmlMasuk += barisHTML; } else { htmlKeluar += barisHTML; } 
         });
+        
         elMasuk.innerHTML = htmlMasuk || '<li style="justify-content:center; color:var(--text-muted); font-size:11px; border: none; padding-top: 20px;">- Kosong -</li>';
         elKeluar.innerHTML = htmlKeluar || '<li style="justify-content:center; color:var(--text-muted); font-size:11px; border: none; padding-top: 20px;">- Kosong -</li>';
+        
         const sTunai = getSaldoDompet('Tunai'), sBank = getSaldoDompet('Bank'), sEwal = getSaldoDompet('e-Wallet');
         let globalIn = 0, globalOut = 0;
-        AppState.db.income.forEach(i => globalIn += i.amount); AppState.db.expense.forEach(e => globalOut += e.amount);
+        
+        AppState.db.income.forEach(i => globalIn += i.amount); 
+        AppState.db.expense.forEach(e => globalOut += e.amount);
+        
         document.getElementById('total-balance').innerText = Utils.formatRp(sTunai + sBank + sEwal);
         document.getElementById('bal-tunai').innerText = Utils.formatRp(sTunai);
         document.getElementById('bal-bank').innerText = Utils.formatRp(sBank);
         document.getElementById('bal-ewallet').innerText = Utils.formatRp(sEwal);
         document.getElementById('total-in').innerText = Utils.formatRp(globalIn);
         document.getElementById('total-out').innerText = Utils.formatRp(globalOut);
+        
         AppState.grafikSaatIni = { in: globalIn, out: globalOut, tunai: sTunai, bank: sBank, ewal: sEwal };
     }
 
