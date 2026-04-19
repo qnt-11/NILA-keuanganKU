@@ -441,11 +441,12 @@
         </div>
     </div>
 </div>
+
 <div id="about-modal" class="modal-overlay hidden">
     <div class="modal-box" style="border: 1px solid var(--purple); padding: 25px 20px; text-align: left; max-height: 85vh; overflow-y: auto;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="font-family: 'Pacifico', cursive; color: var(--danger); margin: 0; font-size: 28px;">keuanganNila</h2>
-            <small id="app-version-display" style="color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">VERSI 3.1</small>
+            <small id="app-version-display" style="color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">VERSI 3.2</small>
         </div>
 
         <div style="font-size: 13px; line-height: 1.6; color: var(--text-light);">
@@ -536,7 +537,7 @@
     // =========================================================
     // 1. PENGATURAN AWAL & DATABASE 
     // =========================================================
-    const APP_VERSION = "3.1"; // TELAH DINAIKKAN AGAR SERVICE WORKER UPDATE
+    const APP_VERSION = "3.2"; // TELAH DINAIKKAN AGAR SERVICE WORKER UPDATE
 
     // LINK GOOGLE SHEETS UNTUK KEUANGAN NILA
     const CLOUD_URL = "https://script.google.com/macros/s/AKfycbytCO5WrWrBcsRWzvjQlBSdV2VoWSqhhhJR0EuPaUmHjGrfig-8VtCKv9ahzzkIXFI/exec";
@@ -1206,7 +1207,15 @@
             return item.date === tglSortir;
         });
 
-        // REVERSE: MENGURUTKAN DARI YANG PALING BARU (Paling Bawah Array menjadi Paling Atas UI)
+        // 🛡️ PENYUNTIKAN LOGIKA: TIMESTAMP SORT & REVERSE 
+        // 1. Urutkan berdasarkan ID (yang mengandung timestamp milidetik) dari yang tertua ke terbaru
+        gabungan.sort((a, b) => {
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            return 0;
+        });
+
+        // 2. Balikkan urutannya agar yang paling baru (ID paling besar) ada di urutan paling atas array
         gabungan.reverse();
         
         let htmlMasuk = '', htmlKeluar = ''; 
