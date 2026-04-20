@@ -795,11 +795,11 @@
 
             // Rangkai opsi bulan untuk dropdown
             let htmlOpts = '';
-            const blnPdk = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
             
             months.forEach(m => {
                 const parts = m.split('-');
-                const display = `${blnPdk[parseInt(parts[1], 10)-1]} ${parts[0]}`;
+                // PERBAIKAN: Menggunakan variabel global BlnPdk (Huruf Besar)
+                const display = `${BlnPdk[parseInt(parts[1], 10)-1]} ${parts[0]}`;
                 // onclick akan mengisi value, mengubah label trigger, menutup opsi, dan menyalakan tombol Download
                 htmlOpts += `<div class="custom-option" onclick="setCustomVal('cloud-month-val','cloud-month-trigger','cloud-month-opts','${m}', '${display}'); document.getElementById('btn-execute-load-cloud').disabled = false;">${display}</div>`;
             });
@@ -1425,6 +1425,12 @@
         } else {
             let kalk = { 'Tunai': 0, 'Bank': 0, 'e-Wallet': 0 };
             AppState.tempImport.forEach(r => { if (!isNaN(Number(r.Jumlah))) { if (String(r.Tipe).toUpperCase() === 'DEBIT') kalk[r.Dompet || 'Tunai'] += Number(r.Jumlah); if (String(r.Tipe).toUpperCase() === 'KREDIT') kalk[r.Dompet || 'Tunai'] -= Number(r.Jumlah); } });
+            
+            // PERBAIKAN: Kosongkan memori HP terlebih dahulu agar data tidak ganda
+            AppState.db.income = []; 
+            AppState.db.expense = []; 
+            AppState.db.mutations = [];
+
             Object.keys(kalk).forEach(d => { if (kalk[d] > 0) AppState.db.income.push({ id: Utils.buatId(), date: Utils.tglHariIni(), desc: `Import Excel`, amount: kalk[d], wallet: d }); else if (kalk[d] < 0) AppState.db.expense.push({ id: Utils.buatId(), date: Utils.tglHariIni(), desc: `Koreksi Excel`, amount: Math.abs(kalk[d]), wallet: d }); });
         }
         simpanDatabase(); updateRekap(); updatePlotList(); updateWalletDropdownBalances(); showPopup('alert', "Data diimpor!", 'var(--excel)');
