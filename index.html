@@ -483,7 +483,7 @@
     </div>
 </div>
 
-<div id="custom-modal" class="modal-overlay hidden">
+<div id="custom-modal" class="modal-overlay hidden" style="z-index: 25000 !important;">
     <div class="modal-box">
         <h3 id="modal-title" style="margin-top:0; margin-bottom: 15px; font-size: 16px;">Informasi</h3>
         <div id="modal-loader" class="loader hidden"></div>
@@ -641,6 +641,23 @@
     ['in-amount', 'out-amount', 'plot-amount', 'mut-amount', 'edit-amount'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', Utils.formatRibuanInput);
+    });
+
+    // Fitur Auto-Capitalize Huruf Awal (Title Case)
+    function autoCapitalizeTitleCase(e) {
+        const input = e.target;
+        const originalStart = input.selectionStart;
+        const originalEnd = input.selectionEnd;
+        const val = input.value;
+        const newVal = val.replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+        if (val !== newVal) {
+            input.value = newVal;
+            input.setSelectionRange(originalStart, originalEnd);
+        }
+    }
+    ['in-desc', 'out-desc', 'edit-desc', 'plot-name'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('input', autoCapitalizeTitleCase);
     });
 
     // =========================================================
