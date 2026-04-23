@@ -1,14 +1,13 @@
 /**
- * SERVICE WORKER keuanganNILA (ENTERPRISE SECURITY & CACHE LIMIT)
- * Versi 1.5
+ * SERVICE WORKER uang famBARLA (ENTERPRISE SECURITY & CACHE LIMIT)
+ * Versi 1.00 (PRO)
  */
 
-const APP_VERSION = '1.5'; 
-const CACHE_PREFIX = 'keuangan-nila-';
+const APP_VERSION = '1.00'; 
+const CACHE_PREFIX = 'uang-fambarla-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
 
-// BUG FIX: Ikon dan Manifest masuk ke Brankas Statis agar PWA bisa diinstall offline
 const staticAssets = [
   './index.html',
   './manifest.json',
@@ -19,7 +18,6 @@ const staticAssets = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
-// BUG FIX: Fungsi Pemotong Bom Waktu Memori
 const limitCacheSize = (name, size) => {
   caches.open(name).then(cache => {
     cache.keys().then(keys => {
@@ -43,7 +41,6 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys => {
       return Promise.all(
         keys.map(key => {
-          // BUG FIX: Hanya hapus cache milik keuanganNILA (Aman untuk GitHub Pages)
           if (key.startsWith(CACHE_PREFIX) && key !== CACHE_STATIC && key !== CACHE_DYNAMIC) {
             return caches.delete(key);
           }
@@ -53,14 +50,16 @@ self.addEventListener('activate', event => {
   );
 });
 
-// BUG FIX: Telepati dengan HTML (Untuk fitur Hapus Semua Data)
 self.addEventListener('message', event => {
   if (event.data && event.data.action === 'CLEAR_CACHE') {
-    caches.keys().then(keys => {
-      keys.forEach(key => {
-        if (key.startsWith(CACHE_PREFIX)) caches.delete(key);
-      });
-    });
+    event.waitUntil(
+      caches.keys().then(keys => {
+        return Promise.all(
+          keys.filter(key => key.startsWith(CACHE_PREFIX))
+              .map(key => caches.delete(key))
+        );
+      })
+    );
   }
 });
 
@@ -72,38 +71,53 @@ self.addEventListener('fetch', event => {
   if (!reqUrl.protocol.startsWith('http')) return;
   if (reqUrl.pathname.endsWith('sw.js')) return;
 
-  // JALUR KHUSUS GOOGLE SHEETS
+  // Bypass Google Sheets (Harus selalu langsung ke internet)
   if (reqUrl.hostname === 'script.google.com') {
     event.respondWith(fetch(req));
     return;
   }
 
-  // BUG FIX: Normalisasi Duplikasi Hantu ./ dan ./index.html
-  if (reqUrl.pathname === '/' || reqUrl.pathname === '/index.html') {
-    req = new Request('./index.html');
-  }
+  // Normalisasi request ke root / menjadi index.html
+  const isIndex = reqUrl.pathname === '/' || reqUrl.pathname === '/index.html';
+  const cacheKey = isIndex ? './index.html' : req;
 
   event.respondWith(
-    caches.match(req, { ignoreSearch: true }).then(cachedResponse => {
-      const networkFetch = fetch(req).then(networkResponse => {
-        // BUG FIX: Anti Wifi Warkop (Captive Portal) & Anti File Rusak
-        if (!networkResponse || !networkResponse.ok || networkResponse.redirected || networkResponse.type === 'opaque') {
-          return networkResponse; 
-        }
-        
-        caches.open(CACHE_DYNAMIC).then(cache => {
-          cache.put(req, networkResponse.clone());
-          limitCacheSize(CACHE_DYNAMIC, 60); // Maksimal 60 file di memori dinamis
-        });
-        return networkResponse.clone();
-      }).catch(() => {
-        // BUG FIX: Fallback White Screen of Death
-        if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
-          return caches.match('./index.html');
-        }
-      });
+    caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
+      // Cek apakah file ini termasuk file statis bawaan aplikasi
+      const isStatic = isIndex || staticAssets.some(asset => reqUrl.href.includes(asset.replace('./', '')));
 
-      return cachedResponse || networkFetch; 
+      if (isStatic) {
+        // STRATEGI CACHE-FIRST: Hemat kuota, ambil dari cache dulu. Fetch hanya jika gagal.
+        return cachedResponse || fetch(req).then(networkResponse => {
+          if (networkResponse && networkResponse.ok) {
+            caches.open(CACHE_STATIC).then(cache => cache.put(cacheKey, networkResponse.clone()));
+          }
+          return networkResponse;
+        }).catch(() => {
+          // Fallback offline untuk file statis untuk mencegah error layar putih
+          if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
+            return caches.match('./index.html');
+          }
+        });
+      } else {
+        // STRATEGI STALE-WHILE-REVALIDATE: Untuk file dinamis di luar bawaan aplikasi
+        const fetchPromise = fetch(req).then(networkResponse => {
+          if (networkResponse && networkResponse.ok && !networkResponse.redirected && networkResponse.type !== 'opaque') {
+            caches.open(CACHE_DYNAMIC).then(cache => {
+              cache.put(req, networkResponse.clone());
+              limitCacheSize(CACHE_DYNAMIC, 60); 
+            });
+          }
+          return networkResponse;
+        }).catch(() => {
+          // Fallback offline untuk file dinamis
+          if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
+            return caches.match('./index.html');
+          }
+        });
+
+        return cachedResponse || fetchPromise;
+      }
     })
   );
 });
