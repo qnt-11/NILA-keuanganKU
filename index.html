@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>keuanganNILA</title>
+    <title>uang famBARLA</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
@@ -30,6 +30,9 @@
             --danger: #ff3b30;   
             --excel: #217346;    
             --cloud: #87CEFA;    
+            --wa-blue: #00BFFF;  
+            --wa-pink: #FF69B4;  
+            --wa-gold: #FFD700;  
         }
 
         html, body { height: 100%; overscroll-behavior-y: none; overflow-x: hidden; width: 100%; max-width: 100%; }
@@ -60,8 +63,9 @@
         .letter { color: #444444; animation: ledRed 8s infinite; }
         @keyframes ledRed { 0%, 100% { color: #444444; text-shadow: none; } 5%, 15% { color: var(--danger); text-shadow: 0 0 8px var(--danger); } }
         
-        header .title-uang { font-size: 14px; letter-spacing: 0px; display: flex; margin-right: 0;}
-        header .title-barla { font-size: 22px; font-weight: 700; letter-spacing: 1px; display: flex; margin-left: 2px;}
+        header .title-uang { font-size: 18px; letter-spacing: 0px; display: flex; margin-right: 4px;}
+        header .title-fam { font-size: 10px; letter-spacing: 0px; display: flex; margin-right: 0px;}
+        header .title-barla { font-size: 18px; letter-spacing: 1px; display: flex;}
         
         .clock-text { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 3px; letter-spacing: 0.5px; }
         .header-actions { display: flex; align-items: center; gap: 8px; justify-content: flex-end;}
@@ -246,10 +250,10 @@
         .chart-wrapper { width: 100%; position: relative; margin: 0 auto;}
 
         /* =========================================================
-           10. ABOUT MODAL & CINTA
+           10. ABOUT MODAL
         ========================================================= */
-        .floating-heart { position: absolute; color: rgba(255,105,180,0.3); animation: floatUp 5s linear infinite; z-index: 1; pointer-events: none;}
-        @keyframes floatUp { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-50px) scale(1.2); opacity: 0; } }
+        #about-modal .modal-box { padding: 30px 20px; text-align: center; max-height: 85vh; width: 90%; max-width: 350px; position: relative; }
+        .about-glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; padding: 25px 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         /* =========================================================
            11. CUSTOM PICKER
@@ -273,20 +277,43 @@
         .creator-watermark { position: fixed; bottom: 15px; left: 12px; font-size: 9px; color: var(--text-muted); z-index: 9999; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8); letter-spacing: 0.3px; }
         .creator-watermark .fam { font-size: 8px; font-weight: 500; }
         .creator-watermark .barla { font-size: 11px; font-weight: 700; color: var(--text-light); }
+
+        /* =========================================================
+           12. EKSTRA LIST CSS
+        ========================================================= */
+        .titipan-list { max-height: 55vh; overflow-y: auto; padding: 0; margin: 0; list-style: none; }
+        .titipan-list::-webkit-scrollbar { width: 3px; }
+        .titipan-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        .titipan-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px; text-align: left; }
+        .titipan-item:last-child { border-bottom: none; }
+        .titipan-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .titipan-name { font-size: 13px; font-weight: 700; color: var(--text-light); display: flex; flex-direction: column; }
+        
+        /* =========================================================
+           13. EKSTRA MENU & CORETAN NYATA
+        ========================================================= */
+        .coretan-nyata { position: relative; display: inline-block; color: #777777 !important; }
+        .coretan-nyata::after {
+            content: ''; position: absolute; top: 50%; left: -5%; width: 110%; height: 2px;
+            background-color: #cccccc; 
+            transform: rotate(-2deg); border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .extra-btn { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; background: transparent; }
+        .extra-btn:active { opacity: 0.6; }
+        .extra-btn-hapus { background: transparent; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .extra-btn-hapus svg { width: 18px; height: 18px; transition: 0.2s; }
+        .extra-btn-hapus:active svg { transform: scale(0.8); }
     </style>
 </head>
 <body>
 
 <header>
     <div style="display: flex; flex-direction: column;">
-        <h2 class="app-title" onclick="promptResetFormulir()" tabindex="0" style="align-items: baseline;">
-            <span class="title-uang audiowide-regular" style="font-size: 14px; margin-right: 0;">keuangan</span>
-            <span class="title-barla" style="font-size: 22px; font-weight: 700; margin-left: 2px;">
-                <span class="letter" style="animation-delay: 1.4s">N</span>
-                <span class="letter" style="animation-delay: 1.6s">I</span>
-                <span class="letter" style="animation-delay: 1.8s">L</span>
-                <span class="letter" style="animation-delay: 2.0s">A</span>
-            </span>
+        <h2 class="app-title" onclick="promptResetFormulir()" tabindex="0">
+            <span class="title-uang"><span class="letter" style="animation-delay: 0.0s">u</span><span class="letter" style="animation-delay: 0.2s">a</span><span class="letter" style="animation-delay: 0.4s">n</span><span class="letter" style="animation-delay: 0.6s">g</span></span>
+            <span class="title-fam"><span class="letter" style="animation-delay: 0.8s">f</span><span class="letter" style="animation-delay: 1.0s">a</span><span class="letter" style="animation-delay: 1.2s">m</span></span>
+            <span class="title-barla"><span class="letter" style="animation-delay: 1.4s">B</span><span class="letter" style="animation-delay: 1.6s">A</span><span class="letter" style="animation-delay: 1.8s">R</span><span class="letter" style="animation-delay: 2.0s">L</span><span class="letter" style="animation-delay: 2.2s">A</span></span>
         </h2>
         <div id="realtime-clock" class="clock-text">Memuat Waktu...</div>
     </div>
@@ -394,6 +421,19 @@
 
         <div id="rekap-focus-hide">
             <div class="balance-box">
+                <div class="dropdown-wrapper extra-menu-wrapper" style="position: absolute; top: 8px; left: 8px;">
+                    <button class="icon-btn" onclick="toggleExtraMenu(event)" style="padding: 4px; display: flex; flex-direction: column; gap: 3px;">
+                        <span style="width:5px; height:5px; border-radius:50%; background-color: var(--wa-blue); box-shadow: 0 0 3px var(--wa-blue);"></span>
+                        <span style="width:5px; height:5px; border-radius:50%; background-color: var(--wa-pink); box-shadow: 0 0 3px var(--wa-pink);"></span>
+                        <span style="width:5px; height:5px; border-radius:50%; background-color: var(--wa-gold); box-shadow: 0 0 3px var(--wa-gold);"></span>
+                    </button>
+                    <div id="extra-dropdown" class="dropdown-content hidden" style="top: 35px; left: 0; min-width: 150px; transform-origin: top left;">
+                        <div class="dropdown-item" style="color: var(--wa-blue); font-weight: 700;" onclick="bukaModalExtra('titipan')">Daftar Titipan</div>
+                        <div class="dropdown-item" style="color: var(--wa-pink); font-weight: 700;" onclick="bukaModalExtra('hutang')">Daftar Hutang</div>
+                        <div class="dropdown-item" style="color: var(--wa-gold); font-weight: 700;" onclick="bukaModalExtra('piutang')">Daftar Piutang</div>
+                    </div>
+                </div>
+
                 <small class="audiowide-regular" style="font-size: 9px; letter-spacing: 1px; color:#888;">SISA SALDO GLOBAL</small>
                 <h2 id="total-balance">Rp 0</h2>
                 
@@ -419,7 +459,7 @@
                 <div class="wallet-card area-darurat2"><small>DANA DARURAT 🔒</small><span id="bal-darurat2">0</span></div>
             </div>
             
-            <div style="display: flex; gap: 8px; margin-bottom: 10px; width: 100%; align-items: stretch;">
+            <div style="display: flex; gap: 8px; margin-bottom: 10px; width: 100%; align-items: stretch; margin-top: 12px;">
                 <div class="card" style="padding: 8px; margin-bottom: 0; border-color: var(--border-color); flex: 1; display: flex; flex-direction: column; box-sizing: border-box; justify-content: center; border-radius: 12px;">
                     <label id="label-bulan-pencarian" style="font-size:9px; margin-bottom: 4px; font-family: 'Montserrat', sans-serif; text-align: center;">RENTANG WAKTU:</label>
                     <div style="display:flex; gap: 4px; justify-content:center; align-items: center; width: 100%;">
@@ -497,59 +537,41 @@
 </div>
 
 <div id="about-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeAboutModal()">
-    <div class="modal-box" style="padding: 30px 20px; text-align: center; max-height: 85vh; width: 90%; max-width: 350px; position: relative;">
+    <div class="modal-box">
         <button onclick="closeAboutModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; transition: 0.2s; z-index: 10;" onmousedown="this.style.color='#fff'">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         
         <div style="text-align: center; margin-bottom: 25px; margin-top: 10px;">
-            <h2 class="app-title about-title" style="justify-content: center; align-items: baseline;">
-                <span class="title-uang audiowide-regular" style="font-size: 14px; margin-right: 0;">keuangan</span>
-                <span class="title-barla" style="font-size: 22px; font-weight: 700; margin-left: 2px;">
-                    <span class="letter" style="animation-delay: 1.4s">N</span>
-                    <span class="letter" style="animation-delay: 1.6s">I</span>
-                    <span class="letter" style="animation-delay: 1.8s">L</span>
-                    <span class="letter" style="animation-delay: 2.0s">A</span>
-                </span>
+            <h2 class="app-title about-title" style="justify-content: center;">
+                <span class="title-uang"><span class="letter" style="animation-delay: 0.0s">u</span><span class="letter" style="animation-delay: 0.2s">a</span><span class="letter" style="animation-delay: 0.4s">n</span><span class="letter" style="animation-delay: 0.6s">g</span></span>
+                <span class="title-fam"><span class="letter" style="animation-delay: 0.8s">f</span><span class="letter" style="animation-delay: 1.0s">a</span><span class="letter" style="animation-delay: 1.2s">m</span></span>
+                <span class="title-barla"><span class="letter" style="animation-delay: 1.4s">B</span><span class="letter" style="animation-delay: 1.6s">A</span><span class="letter" style="animation-delay: 1.8s">R</span><span class="letter" style="animation-delay: 2.0s">L</span><span class="letter" style="animation-delay: 2.2s">A</span></span>
             </h2>
             <div style="margin-top: 8px;">
-                <span id="app-version-display" style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">VERSI 1.00 ❤️</span>
+                <span id="app-version-display" style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">VERSI 1.00 (PRO)</span>
             </div>
         </div>
         
         <div style="font-size: 13px; line-height: 1.6; color: #ffffff; font-family: 'Montserrat', sans-serif;">
-            <div class="about-glass-card" style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; padding: 25px 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                <div class="floating-heart" style="left: 15%; font-size: 10px; animation-delay: 0s;">❤️</div>
-                <div class="floating-heart" style="left: 80%; font-size: 14px; animation-delay: 1.5s;">❤️</div>
-                <div class="floating-heart" style="left: 45%; font-size: 8px; animation-delay: 3s;">❤️</div>
+            <div class="about-glass-card">
+                <p style="text-align: center; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; margin-top: 0; margin-bottom: 8px; font-size: 9px;">DEVELOPED BY</p>
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <strong class="audiowide-regular" style="color: #ffffff; font-size: 17px; display: block; line-height: 1.4; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Ginanjar Wahyu RHP</strong>
+                </div>
                 
-                <p style="position: relative; z-index: 2; text-align: center; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; margin-top: 0; margin-bottom: 12px; font-size: 9px;">DEDIKASI KHUSUS</p>
-                <div style="position: relative; z-index: 2; text-align: center; margin-bottom: 15px;">
-                    <p style="font-size: 11px; margin-bottom: 5px;">💌 Diciptakan secara khusus dan eksklusif untuk istriku tercinta,</p>
-                    <strong class="audiowide-regular" style="color: #ffffff; font-size: 18px; display: block; line-height: 1.4; text-shadow: 0 0 12px rgba(255,105,180,0.6), 0 2px 4px rgba(0,0,0,0.8);">NILA RIZKI PERMATASARI.</strong>
-                    <p style="font-size: 11px; font-style: italic; font-weight: 300; color: #cccccc; margin-top: 15px; line-height: 1.5;">"Semoga aplikasi ini bisa mempermudah kamu dalam mengatur keuangan rumah tangga kita, menjadikannya lebih rapi, terkontrol, dan selalu membawa keberkahan."</p>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.401l8.073-4.908c1.618-1.214 3.927-.059 3.927 1.964z"/><path fill="#34A853" d="M20.182 21H24v-9.273z"/><path fill="#FBBC05" d="M0 11.727V21h3.818v-9.273z"/><path fill="#4285F4" d="M12 16.636l6.545-4.908V5.457L12 10.364z"/><path fill="#EA4335" d="M3.818 5.457L12 10.364 20.182 5.457v6.271z"/></svg>
+                        <span style="font-weight: 600; font-size: 12px; letter-spacing: 0.5px;">n_dazmoe@yahoo.com</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        <span style="font-weight: 600; font-size: 12px; letter-spacing: 0.5px;">github.com/qnt-11</span>
+                    </div>
                 </div>
             </div>
-
-            <div class="about-glass-card" style="padding: 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                <p style="font-size: 10px; text-align: center; margin-top: 0; margin-bottom: 15px; color: #dddddd;">keuanganNila adalah aplikasi manajemen finansial pribadi yang simpel, aesthetic, dan dirancang dengan sistem keamanan data tingkat tinggi.</p>
-                <p style="text-align: center; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; margin-top: 0; margin-bottom: 8px; font-size: 9px;"><span style="font-size: 12px;">🔒</span> PRIVASI & KEAMANAN</p>
-                <p style="font-size: 10px; text-align: center; color: #aaaaaa; margin: 0;">Aplikasi ini beroperasi 100% offline. Riwayat tersimpan di memori lokal HP dan brankas Google Sheets pribadi.</p>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 10px;">
-                <p style="font-size: 10px; color: var(--text-muted); margin: 0 0 2px 0;">Dibuat penuh cinta oleh:</p>
-                <strong class="audiowide-regular" style="color: #ffffff; font-size: 15px; letter-spacing: 1px; margin-bottom: 10px;">Ginanjar Wr Hp</strong>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.401l8.073-4.908c1.618-1.214 3.927-.059 3.927 1.964z"/><path fill="#34A853" d="M20.182 21H24v-9.273z"/><path fill="#FBBC05" d="M0 11.727V21h3.818v-9.273z"/><path fill="#4285F4" d="M12 16.636l6.545-4.908V5.457L12 10.364z"/><path fill="#EA4335" d="M3.818 5.457L12 10.364 20.182 5.457v6.271z"/></svg>
-                    <span style="font-weight: 500; font-size: 11px; letter-spacing: 0.5px; color: #dddddd;">n_dazmoe@yahoo.com</span>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                    <span style="font-weight: 500; font-size: 11px; letter-spacing: 0.5px; color: #dddddd;">github.com/qnt-11</span>
-                </div>
-            </div>
-            <p style="text-align: center; color: #555555; font-size: 9px; margin-top: 25px; margin-bottom: 0; font-weight: 700; letter-spacing: 1px;">Hak Cipta © 2026 - All Rights Reserved</p>
+            <p style="text-align: center; color: #555555; font-size: 10px; margin-top: 25px; margin-bottom: 0; font-weight: 700; letter-spacing: 1px;">Hak Cipta © 2026 - All Rights Reserved</p>
         </div>
     </div>
 </div>
@@ -607,6 +629,58 @@
     </div>
 </div>
 
+<div id="extra-modal" class="modal-overlay hidden" style="z-index: 20000;">
+    <div class="modal-box" id="extra-modal-box" style="padding: 20px; width: 90%; max-width: 350px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 10px;">
+            <h3 id="extra-modal-title" class="audiowide-regular" style="margin:0; font-size:15px;">Daftar Ekstra</h3>
+            <button onclick="tutupModalExtra()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0; display:flex;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        </div>
+        <ul id="list-extra" class="titipan-list"></ul>
+        <button id="btn-tambah-extra" class="btn-main audiowide-regular" onclick="bukaFormExtra('tambah')" style="margin-top: 15px;">+ CATAT</button>
+    </div>
+</div>
+
+<div id="extra-form-modal" class="modal-overlay hidden" style="z-index: 20001;">
+    <div class="modal-box" id="extra-form-box" style="padding: 20px;">
+        <h3 id="extra-form-title" class="audiowide-regular" style="margin-top:0; margin-bottom: 15px; font-size:15px;">Catat</h3>
+        <div class="form-group" style="text-align:left;"><label>Nama (Orang/Instansi)</label><input type="text" id="extra-nama" class="auto-cap" placeholder="Misal: Barla" autocomplete="off"></div>
+        <div class="form-group" style="text-align:left;"><label>Keterangan (Opsional)</label><input type="text" id="extra-catatan" class="auto-cap" placeholder="Misal: Patungan Wifi" autocomplete="off"></div>
+        <div class="form-group" style="text-align:left;"><label>Jumlah (Rp)</label><input type="text" inputmode="numeric" id="extra-nominal" placeholder="0" oninput="Utils.formatRibuanInput(event)"></div>
+        <div class="form-group" style="text-align:left;" id="extra-wallet-group">
+            <label id="extra-wallet-label">Masuk ke Dompet</label>
+            <div class="custom-select-container">
+                <div class="custom-select-trigger text-ellipsis" id="extra-wallet-trigger" onclick="toggleCustomSelect('extra-wallet-opts', event)">Tunai</div>
+                <div class="custom-select-options hidden" id="extra-wallet-opts"></div>
+            </div>
+            <input type="hidden" id="extra-wallet" value="Tunai">
+        </div>
+        <input type="hidden" id="extra-id-edit" value="">
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="document.getElementById('extra-form-modal').classList.add('hidden');">BATAL</button>
+            <button id="btn-simpan-extra" class="modal-btn ok" onclick="simpanExtra()">SIMPAN</button>
+        </div>
+    </div>
+</div>
+
+<div id="extra-selesai-modal" class="modal-overlay hidden" style="z-index: 20001;">
+    <div class="modal-box" id="extra-selesai-box" style="padding: 20px;">
+        <h3 id="extra-selesai-title" class="audiowide-regular" style="margin-top:0; margin-bottom: 10px; font-size:15px;">Penyelesaian</h3>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;"><span id="extra-selesai-desc"></span> <strong id="extra-selesai-nama" style="color:#fff;"></strong></p>
+        <div class="form-group" style="text-align:left;">
+            <div class="custom-select-container">
+                <div class="custom-select-trigger text-ellipsis" id="extra-selesai-wallet-trigger" onclick="toggleCustomSelect('extra-selesai-wallet-opts', event)">Tunai</div>
+                <div class="custom-select-options hidden" id="extra-selesai-wallet-opts"></div>
+            </div>
+            <input type="hidden" id="extra-selesai-wallet" value="Tunai">
+        </div>
+        <input type="hidden" id="extra-id-selesai" value="">
+        <div class="modal-actions">
+            <button id="btn-batal-selesai-extra" class="modal-btn cancel" onclick="document.getElementById('extra-selesai-modal').classList.add('hidden');">BATAL</button>
+            <button id="btn-proses-selesai-extra" class="modal-btn ok" onclick="prosesSelesaiExtra(event)">PROSES</button>
+        </div>
+    </div>
+</div>
+
 <input type="file" id="file-import" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
 <div class="creator-watermark">created by <span class="fam">fam</span><span class="barla audiowide-regular">BARLA</span></div>
 
@@ -615,16 +689,16 @@
     // 1. PENGATURAN AWAL & VARIABEL GLOBAL
     // =========================================================
     const APP_VERSION = "1.00"; 
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbytCO5WrWrBcsRWzvjQlBSdV2VoWSqhhhJR0EuPaUmHjGrfig-8VtCKv9ahzzkIXFI/exec";
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyb_E0cL3_bMSlFHQ68KbahPI6FzoNsZRLGzFCExumIsWsmRqygB0p8KOwn2k4LbIQa/exec";
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => console.error("SW tidak ditemukan."));
     }
 
     let AppState = {
-        db: { income: [], expense: [], mutations: [], plots: [] },
+        db: { income: [], expense: [], mutations: [], plots: [], titipan: [], hutang: [], piutang: [] },
         charts: { arusKas: null, portofolio: null },
-        tempImport: [], tempImportPlots: [],
+        tempImport: [], tempImportPlots: [], tempImportTitipan: [],
         grafikSaatIni: { in: 0, out: 0, tunai: 0, bank: 0, ewal: 0, darurat1: 0, darurat2: 0, visibleExpenses: [] },
         prevBalances: { total: 0, in: 0, out: 0, tunai: 0, bank: 0, ewal: 0, darurat1: 0, darurat2: 0 }
     };
@@ -645,6 +719,9 @@
                 AppState.db.expense = parsed.expense || [];
                 AppState.db.mutations = parsed.mutations || [];
                 AppState.db.plots = parsed.plots || [];
+                AppState.db.titipan = parsed.titipan || []; 
+                AppState.db.hutang = parsed.hutang || []; 
+                AppState.db.piutang = parsed.piutang || []; 
             }
             saldoCache.valid = false;
         } catch (e) {
@@ -770,32 +847,6 @@
         };
         obj.animationId = window.requestAnimationFrame(step);
     }
-    
-    function triggerConfetti() {
-        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FFD166', '#9B5DE5', '#00F5D4', '#FF9A9E'];
-        for (let i = 0; i < 60; i++) {
-            const confetti = document.createElement('div');
-            confetti.style.position = 'fixed';
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.top = '-20px';
-            confetti.style.width = Math.random() * 8 + 5 + 'px';
-            confetti.style.height = Math.random() * 12 + 6 + 'px';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.zIndex = '99999';
-            confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '2px');
-            confetti.style.pointerEvents = 'none';
-            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-            confetti.style.transition = `top ${Math.random() * 2 + 2}s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform ${Math.random() * 2 + 2}s ease-in-out`;
-            document.body.appendChild(confetti);
-            
-            setTimeout(() => {
-                confetti.style.top = '120vh';
-                confetti.style.transform = `rotate(${Math.random() * 720}deg) translateX(${Math.random() * 200 - 100}px)`;
-            }, 50);
-            
-            setTimeout(() => confetti.remove(), 4000);
-        }
-    }
 
     function jalankanJam() {
         const waktu = new Date();
@@ -820,7 +871,7 @@
         }
     }, true);
 
-    ['in-amount', 'out-amount', 'plot-amount', 'mut-amount', 'edit-amount'].forEach(id => {
+    ['in-amount', 'out-amount', 'plot-amount', 'mut-amount', 'edit-amount', 'extra-nominal'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', Utils.formatRibuanInput);
     });
@@ -918,6 +969,7 @@
     function openAboutModal() { 
         document.getElementById('dropdown-menu').classList.add('hidden'); 
         document.getElementById('balance-dropdown').classList.add('hidden'); 
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.getElementById('about-modal').classList.remove('hidden'); 
         document.body.classList.add('modal-open');
     }
@@ -932,13 +984,13 @@
     // =========================================================
     function backupToCloud() {
         document.getElementById('dropdown-menu').classList.add('hidden');
-        if (AppState.db.income.length === 0 && AppState.db.expense.length === 0 && AppState.db.mutations.length === 0 && AppState.db.plots.length === 0) {
+        if (AppState.db.income.length === 0 && AppState.db.expense.length === 0 && AppState.db.mutations.length === 0 && AppState.db.plots.length === 0 && AppState.db.titipan.length === 0 && AppState.db.hutang.length === 0 && AppState.db.piutang.length === 0) {
             return showPopup('alert', "Data di HP kosong! Upload dibatalkan.", 'var(--danger)');
         }
         if(!CLOUD_URL || CLOUD_URL.includes("ISI_DENGAN")) return showPopup('alert', "Penyimpanan Cloud belum disetel!", 'var(--danger)');
         
         showPopup('loading', "Mengunggah data ke Cloud...\nMohon tunggu sebentar.", 'var(--cloud)');
-        const payload = { activeMonth: "ALL", income: AppState.db.income, expense: AppState.db.expense, mutations: AppState.db.mutations, plots: AppState.db.plots };
+        const payload = { activeMonth: "ALL", income: AppState.db.income, expense: AppState.db.expense, mutations: AppState.db.mutations, plots: AppState.db.plots, titipan: AppState.db.titipan, hutang: AppState.db.hutang, piutang: AppState.db.piutang };
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); 
@@ -1030,6 +1082,22 @@
                         }
                     });
                 }
+
+                if (data.titipan) {
+                    data.titipan.forEach(cloudTitipan => {
+                        if (!AppState.db.titipan.some(local => local.id === cloudTitipan.id)) AppState.db.titipan.push(cloudTitipan);
+                    });
+                }
+                if (data.hutang) {
+                    data.hutang.forEach(cloudHutang => {
+                        if (!AppState.db.hutang.some(local => local.id === cloudHutang.id)) AppState.db.hutang.push(cloudHutang);
+                    });
+                }
+                if (data.piutang) {
+                    data.piutang.forEach(cloudPiutang => {
+                        if (!AppState.db.piutang.some(local => local.id === cloudPiutang.id)) AppState.db.piutang.push(cloudPiutang);
+                    });
+                }
                 
                 try {
                     simpanDatabase(); 
@@ -1070,6 +1138,7 @@
             const filterEl = document.getElementById('plot-month-filter');
             if (filterEl) { filterEl.dataset.rawDate = blnIni; filterEl.value = `${BlnPdk[parseInt(blnIni.split('-')[1], 10)-1]} ${blnIni.split('-')[0]}`; }
 
+            // Reset Tanggal Filter Rekap
             const d = new Date();
             const startStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
             const elStart = document.getElementById('rekap-start-date');
@@ -1116,7 +1185,9 @@
             {opts: 'out-wallet-opts', trigger: 'out-wallet-trigger', hidden: 'out-wallet'},
             {opts: 'mut-from-opts', trigger: 'mut-from-trigger', hidden: 'mut-from'},
             {opts: 'mut-to-opts', trigger: 'mut-to-trigger', hidden: 'mut-to'},
-            {opts: 'edit-wallet-opts', trigger: 'edit-wallet-trigger', hidden: 'edit-wallet'}
+            {opts: 'edit-wallet-opts', trigger: 'edit-wallet-trigger', hidden: 'edit-wallet'},
+            {opts: 'extra-wallet-opts', trigger: 'extra-wallet-trigger', hidden: 'extra-wallet'},
+            {opts: 'extra-selesai-wallet-opts', trigger: 'extra-selesai-wallet-trigger', hidden: 'extra-selesai-wallet'}
         ];
         
         const elMutFrom = document.getElementById('mut-from');
@@ -1133,7 +1204,7 @@
                 if (dd.hidden === 'mut-to' && w === mutFromVal) return; 
                 
                 let displayTxt = w;
-                if (dd.hidden !== 'in-wallet') {
+                if (dd.hidden !== 'in-wallet' && dd.hidden !== 'extra-wallet') {
                     const bal = getSaldoDompet(w);
                     displayTxt = `${w} (Rp ${bal.toLocaleString('id-ID')})`;
                 }
@@ -1149,7 +1220,7 @@
                      return;
                 }
                 let triggerTxt = currentVal;
-                if (dd.hidden !== 'in-wallet') {
+                if (dd.hidden !== 'in-wallet' && dd.hidden !== 'extra-wallet') {
                     const currentBal = getSaldoDompet(currentVal);
                     triggerTxt = `${currentVal} (Rp ${currentBal.toLocaleString('id-ID')})`;
                 }
@@ -1180,7 +1251,7 @@
                  if (descInput) descInput.value = ""; 
              }
         } else {
-             if (inputId !== 'in-wallet' && inputId !== 'cloud-month-val' && nilai !== "") {
+             if (inputId !== 'in-wallet' && inputId !== 'extra-wallet' && inputId !== 'cloud-month-val' && nilai !== "") {
                  const bal = getSaldoDompet(nilai);
                  displayTxt = customDisplay !== null ? customDisplay : `${nilai} (Rp ${bal.toLocaleString('id-ID')})`;
              }
@@ -1223,6 +1294,7 @@
     function showPage(event, idHalaman) {
         document.getElementById('dropdown-menu').classList.add('hidden');
         document.getElementById('balance-dropdown').classList.add('hidden');
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(idHalaman).classList.remove('hidden');
@@ -1254,6 +1326,7 @@
         document.querySelectorAll('.custom-select-options').forEach(el => { if (el.id !== optId) el.classList.add('hidden'); });
         document.getElementById('dropdown-menu').classList.add('hidden');
         document.getElementById('balance-dropdown').classList.add('hidden');
+        document.getElementById('extra-dropdown').classList.add('hidden');
         const optEl = document.getElementById(optId);
         if(optEl) optEl.classList.toggle('hidden');
     }
@@ -1262,6 +1335,7 @@
         e.stopPropagation(); 
         document.querySelectorAll('.custom-select-options').forEach(el => el.classList.add('hidden'));
         document.getElementById('balance-dropdown').classList.add('hidden');
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.getElementById('dropdown-menu').classList.toggle('hidden'); 
     }
     
@@ -1269,14 +1343,20 @@
         e.stopPropagation(); 
         document.querySelectorAll('.custom-select-options').forEach(el => el.classList.add('hidden'));
         document.getElementById('dropdown-menu').classList.add('hidden');
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.getElementById('balance-dropdown').classList.toggle('hidden'); 
     }
 
     document.addEventListener('click', e => {
         const menu = document.getElementById('dropdown-menu');
         if (menu && !menu.classList.contains('hidden') && !e.target.closest('#kebab-btn')) menu.classList.add('hidden');
+        
         const balMenu = document.getElementById('balance-dropdown');
         if (balMenu && !balMenu.classList.contains('hidden') && !e.target.closest('.balance-box')) balMenu.classList.add('hidden');
+        
+        const extMenu = document.getElementById('extra-dropdown');
+        if (extMenu && !extMenu.classList.contains('hidden') && !e.target.closest('.extra-menu-wrapper')) extMenu.classList.add('hidden');
+        
         document.querySelectorAll('.custom-select-options').forEach(el => {
             if (!el.classList.contains('hidden') && !e.target.closest('.custom-select-container')) el.classList.add('hidden');
         });
@@ -1289,18 +1369,6 @@
         try {
             const warnaTema = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
             const descTitleCase = Utils.toTitleCase(ket);
-            
-            let isPlotLunasBarusan = false;
-            if (tipe === 'expense' && plt) {
-                const plotObj = AppState.db.plots.find(p => p.id === plt);
-                if (plotObj) {
-                    const expenseValid = AppState.db.expense.filter(e => e.date.startsWith(tgl.substring(0, 7)));
-                    const terpakaiLama = expenseValid.reduce((sum, e) => e.plotId === plt ? sum + e.amount : sum, 0);
-                    if (terpakaiLama < plotObj.target && (terpakaiLama + nom) >= plotObj.target) {
-                        isPlotLunasBarusan = true;
-                    }
-                }
-            }
             
             AppState.db[tipe].push({ id: Utils.buatId(), date: tgl, desc: descTitleCase, amount: nom, wallet: dmp, plotId: plt });
             simpanDatabase();
@@ -1320,8 +1388,6 @@
             updateRekap();
             updateWalletDropdownBalances();
             showPopup('alert', "Catatan berhasil disimpan!", warnaTema);
-            
-            if (isPlotLunasBarusan) setTimeout(triggerConfetti, 300);
         } catch(e) {
             console.error(e);
             showPopup('alert', "Terjadi kesalahan sistem saat menyimpan.", '#ffffff');
@@ -1369,6 +1435,17 @@
 
     function editData(tipe, idItem) {
         if (tipe === 'mutations') return showPopup('alert', "Mutasi tidak bisa diedit. Hapus (✖) dan buat ulang.", '#ffffff');
+        
+        if (tipe === 'income') {
+            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem && t.status === 'aktif');
+            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem && h.status === 'aktif');
+            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah riwayat Titipan/Hutang yang masih aktif! Silakan Edit nominal/nama melalui Menu Ekstra (Titik 3).', 'var(--danger)');
+        }
+        if (tipe === 'expense') {
+            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem && p.status === 'aktif');
+            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah riwayat Piutang yang masih aktif! Silakan Edit nominal/nama melalui Menu Ekstra (Titik 3).', 'var(--danger)');
+        }
+
         const data = AppState.db[tipe].find(i => i.id === idItem);
         if (!data) return;
         
@@ -1418,7 +1495,7 @@
             
             if (!descBaru) return showPopup('alert', "Keterangan tidak boleh kosong!", titleColor);
 
-            const nominalLama = data.amount, dompetLama = data.wallet, plotLama = data.plotId;
+            const nominalLama = data.amount, dompetLama = data.wallet;
             let saldoAman = true;
             let pesanError = "Saldo akan minus!";
             
@@ -1437,32 +1514,11 @@
 
             if (!saldoAman) return showPopup('alert', pesanError, titleColor);
             
-            let isPlotLunasBarusan = false;
-            if (tipe === 'expense' && plotBaru) {
-                const plotObj = AppState.db.plots.find(p => p.id === plotBaru);
-                if (plotObj) {
-                    const expenseValid = AppState.db.expense.filter(e => e.date.startsWith(tglBaru.substring(0, 7)) && e.id !== idItem);
-                    const terpakaiLainnya = expenseValid.reduce((sum, e) => e.plotId === plotBaru ? sum + e.amount : sum, 0);
-                    
-                    let terpakaiLamaTotal = terpakaiLainnya;
-                    if (plotLama === plotBaru && data.date.substring(0,7) === tglBaru.substring(0,7)) {
-                        terpakaiLamaTotal += nominalLama;
-                    }
-                    
-                    const terpakaiBaruTotal = terpakaiLainnya + nomBaru;
-                    if (terpakaiLamaTotal < plotObj.target && terpakaiBaruTotal >= plotObj.target) {
-                        isPlotLunasBarusan = true;
-                    }
-                }
-            }
-
             data.amount = nomBaru; data.wallet = dompetBaru; data.date = tglBaru; data.desc = descBaru; data.plotId = plotBaru; 
             simpanDatabase(); 
             document.getElementById('edit-modal').classList.add('hidden');
             if(document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) document.body.classList.remove('modal-open');
             updateRekap(); updatePlotList(); updateWalletDropdownBalances();
-            
-            if (isPlotLunasBarusan) setTimeout(triggerConfetti, 300);
         };
     }
 
@@ -1471,8 +1527,17 @@
         const dataTarget = AppState.db[tipe].find(x => x.id === idItem);
         
         if (tipe === 'income') {
+            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem && t.status === 'aktif');
+            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem && h.status === 'aktif');
+            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah Uang Titipan/Hutang yang masih aktif! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
+
             const kekur = getSaldoDompet(dataTarget.wallet) - dataTarget.amount;
             if (kekur < 0) return showPopup('alert', `Batal: Saldo dompet kurang ${Utils.formatRp(Math.abs(kekur))}!`, '#ffffff');
+        }
+        
+        if (tipe === 'expense') {
+            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem && p.status === 'aktif');
+            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah Uang Piutang yang masih aktif! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
         }
         
         if (tipe === 'mutations') {
@@ -1489,6 +1554,7 @@
     function openMutationModal() { 
         document.getElementById('dropdown-menu').classList.add('hidden'); 
         document.getElementById('balance-dropdown').classList.add('hidden'); 
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.getElementById('mutation-modal').classList.remove('hidden'); 
         document.body.classList.add('modal-open');
         
@@ -1635,15 +1701,15 @@
             if (selisih > 0) {
                 tSelisih = "Kurang";
                 nSelisih = `(-${Utils.formatRp(selisih)})`;
-                cSelisih = "var(--wa-green)"; 
+                cSelisih = "var(--wa-green)";
             } else if (selisih < 0) {
                 tSelisih = "Lebih";
                 nSelisih = `(+${Utils.formatRp(Math.abs(selisih))})`;
-                cSelisih = "var(--danger)"; 
+                cSelisih = "var(--danger)";
             } else {
                 tSelisih = "Kurang";
                 nSelisih = "(Rp 0)";
-                cSelisih = "var(--danger)"; 
+                cSelisih = "var(--danger)";
             }
             
             const cBayar = (terpakai >= p.target && p.target > 0) ? 'var(--danger)' : 'var(--wa-green)';
@@ -1832,6 +1898,7 @@
     function openChartModal() { 
         document.getElementById('dropdown-menu').classList.add('hidden'); 
         document.getElementById('balance-dropdown').classList.add('hidden'); 
+        document.getElementById('extra-dropdown').classList.add('hidden');
         document.getElementById('chart-modal').classList.remove('hidden'); 
         document.body.classList.add('modal-open');
         requestAnimationFrame(() => renderGrafik()); 
@@ -1960,6 +2027,17 @@
             const wsPlot = XLSX.utils.json_to_sheet(plotData); 
             XLSX.utils.book_append_sheet(wb, wsPlot, "Daftar_Plot"); 
         }
+
+        if(AppState.db.titipan && AppState.db.titipan.length > 0) { 
+            const wsTitipan = XLSX.utils.json_to_sheet(AppState.db.titipan); XLSX.utils.book_append_sheet(wb, wsTitipan, "Daftar_Titipan"); 
+        }
+        if(AppState.db.hutang && AppState.db.hutang.length > 0) { 
+            const wsHutang = XLSX.utils.json_to_sheet(AppState.db.hutang); XLSX.utils.book_append_sheet(wb, wsHutang, "Daftar_Hutang"); 
+        }
+        if(AppState.db.piutang && AppState.db.piutang.length > 0) { 
+            const wsPiutang = XLSX.utils.json_to_sheet(AppState.db.piutang); XLSX.utils.book_append_sheet(wb, wsPiutang, "Daftar_Piutang"); 
+        }
+
         XLSX.writeFile(wb, `uang_famBARLA_Backup_${Utils.tglHariIni()}.xlsx`);
     }
 
@@ -2002,6 +2080,9 @@
                 const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
                 AppState.tempImport = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 AppState.tempImportPlots = wb.SheetNames.includes("Daftar_Plot") ? XLSX.utils.sheet_to_json(wb.Sheets["Daftar_Plot"]) : [];
+                AppState.tempImportTitipan = wb.SheetNames.includes("Daftar_Titipan") ? XLSX.utils.sheet_to_json(wb.Sheets["Daftar_Titipan"]) : [];
+                AppState.tempImportHutang = wb.SheetNames.includes("Daftar_Hutang") ? XLSX.utils.sheet_to_json(wb.Sheets["Daftar_Hutang"]) : [];
+                AppState.tempImportPiutang = wb.SheetNames.includes("Daftar_Piutang") ? XLSX.utils.sheet_to_json(wb.Sheets["Daftar_Piutang"]) : [];
                 document.getElementById('import-modal').classList.remove('hidden');
                 document.body.classList.add('modal-open');
             } catch (err) { showPopup('alert', "Format File tidak dikenali.", '#ffffff'); } finally { e.target.value = ''; }
@@ -2019,6 +2100,10 @@
                 }
             }); 
         }
+
+        if(AppState.tempImportTitipan && AppState.tempImportTitipan.length > 0) AppState.db.titipan = AppState.tempImportTitipan;
+        if(AppState.tempImportHutang && AppState.tempImportHutang.length > 0) AppState.db.hutang = AppState.tempImportHutang;
+        if(AppState.tempImportPiutang && AppState.tempImportPiutang.length > 0) AppState.db.piutang = AppState.tempImportPiutang;
         
         if (mode === 'semua') {
             AppState.tempImport.forEach(r => {
@@ -2096,7 +2181,7 @@
             if (AppState.charts.portofolio) AppState.charts.portofolio.destroy();
             
             localStorage.removeItem('famBARLA_DB'); 
-            AppState.db = { income: [], expense: [], mutations: [], plots: [] }; 
+            AppState.db = { income: [], expense: [], mutations: [], plots: [], titipan: [], hutang: [], piutang: [] }; 
             simpanDatabase(); 
             updateRekap(); 
             updatePlotList(); 
@@ -2179,6 +2264,7 @@
         try {
             document.getElementById('dropdown-menu').classList.add('hidden');
             document.getElementById('balance-dropdown').classList.add('hidden');
+            document.getElementById('extra-dropdown').classList.add('hidden');
 
             Picker.targetId = id; Picker.mode = m; Picker.theme = w; 
             
@@ -2290,7 +2376,251 @@
     
     function terapkanVersi() {
         const elVersi = document.getElementById('app-version-display');
-        if (elVersi) elVersi.innerText = `VERSI 1.00 ❤️`;
+        if (elVersi) elVersi.innerText = `VERSI 1.00 (PRO)`;
+    }
+
+    // =========================================================
+    // 12. FITUR EKSTRA (TITIPAN, HUTANG, PIUTANG)
+    // =========================================================
+    const DB_EKSTRA = {
+        titipan: { nama: 'Titipan', warna: 'var(--wa-blue)', msk: 'income', klr: 'expense', idTrx: 'incomeId', lblWallet: 'Masuk ke Dompet', teksSelesai: 'Uang dikembalikan kepada:', descMsk: 'Titipan dari ', descKlr: 'Pengembalian Titipan ', btn: 'KEMBALIKAN' },
+        hutang: { nama: 'Hutang', warna: 'var(--wa-pink)', msk: 'income', klr: 'expense', idTrx: 'incomeId', lblWallet: 'Masuk ke Dompet', teksSelesai: 'Bayar hutang kepada:', descMsk: 'Pinjaman dari ', descKlr: 'Bayar Hutang ke ', btn: 'BAYAR' },
+        piutang: { nama: 'Piutang', warna: 'var(--wa-gold)', msk: 'expense', klr: 'income', idTrx: 'expenseId', lblWallet: 'Keluar dari Dompet', teksSelesai: 'Terima pembayaran dari:', descMsk: 'Pinjaman untuk ', descKlr: 'Pembayaran dari ', btn: 'TERIMA' }
+    };
+    
+    let ModeEkstraAktif = 'titipan';
+
+    function toggleExtraMenu(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-select-options').forEach(el => el.classList.add('hidden'));
+        document.getElementById('balance-dropdown').classList.add('hidden');
+        document.getElementById('dropdown-menu').classList.add('hidden');
+        document.getElementById('extra-dropdown').classList.toggle('hidden');
+    }
+
+    function renderDaftarExtra() {
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        const ul = document.getElementById('list-extra');
+        if (!AppState.db[ModeEkstraAktif]) AppState.db[ModeEkstraAktif] = [];
+        
+        if (AppState.db[ModeEkstraAktif].length === 0) {
+            ul.innerHTML = `<li style="text-align:center; padding: 30px 0; color:var(--border-color); font-size:11px;">- Belum ada ${cfg.nama.toLowerCase()} -</li>`;
+            return;
+        }
+
+        let html = '';
+        const sorted = [...AppState.db[ModeEkstraAktif]].sort((a, b) => {
+            if (a.status === 'aktif' && b.status === 'selesai') return -1;
+            if (a.status === 'selesai' && b.status === 'aktif') return 1;
+            return b.id.localeCompare(a.id);
+        });
+
+        sorted.forEach(t => {
+            const isSelesai = t.status === 'selesai';
+            const catHtml = t.catatan ? `<br><small style="font-size:9px; color:var(--text-muted); font-weight:500;">${Utils.amanHTML(t.catatan)}</small>` : '';
+            const htmlNama = isSelesai ? `<span class="coretan-nyata">${Utils.amanHTML(t.nama)}</span>${catHtml}` : `<span style="color:var(--text-light);">${Utils.amanHTML(t.nama)}</span>${catHtml}`;
+            const htmlNominal = isSelesai ? `<span class="coretan-nyata">${Utils.formatRp(t.amount)}</span>` : `<span style="color:${cfg.warna};">${Utils.formatRp(t.amount)}</span>`;
+
+            let aksiHtml = isSelesai ? 
+                `<button class="extra-btn-hapus" onclick="hapusExtra('${t.id}')" title="Hapus Riwayat"><svg viewBox="0 0 24 24" stroke="${cfg.warna}" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : 
+                `<button class="extra-btn" style="color:var(--text-light); border:1px solid var(--border-color);" onclick="bukaFormExtra('edit', '${t.id}')">EDIT</button>
+                 <button class="extra-btn" style="color:${cfg.warna}; border:1px solid ${cfg.warna};" onclick="bukaSelesaiExtra('${t.id}')">✔️ SELESAI</button>`;
+
+            html += `
+            <li class="titipan-item">
+                <div class="titipan-header">
+                    <div class="titipan-name">
+                        ${htmlNama}
+                        ${isSelesai ? `<span class="titipan-time" style="color:#888; font-size:10px; font-weight:600; margin-top:2px;">${t.dateOut}</span>` : `<span style="font-size:9px; color:var(--text-muted); font-weight:500; margin-top:2px;">Dibuat: ${Utils.formatTglTampil(t.dateIn)}</span>`}
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="titipan-amount" style="font-size:13px; font-weight:700;">${htmlNominal}</span>
+                        ${aksiHtml}
+                    </div>
+                </div>
+                ${!isSelesai ? `<div class="titipan-actions" style="display:flex; gap:8px; margin-top:4px;"></div>` : ''}
+            </li>`;
+        });
+        ul.innerHTML = html;
+    }
+
+    function bukaModalExtra(tipe) {
+        ModeEkstraAktif = tipe;
+        const cfg = DB_EKSTRA[tipe];
+        document.getElementById('extra-dropdown').classList.add('hidden');
+        
+        document.getElementById('extra-modal-title').innerText = `Daftar ${cfg.nama}`;
+        document.getElementById('extra-modal-title').style.color = cfg.warna;
+        document.getElementById('extra-modal-box').style.borderColor = cfg.warna;
+        
+        const btnTambah = document.getElementById('btn-tambah-extra');
+        btnTambah.innerText = `+ CATAT ${cfg.nama.toUpperCase()}`;
+        btnTambah.style.cssText = `background-color: #222222 !important; color: ${cfg.warna} !important; border: 1px solid ${cfg.warna} !important; width: 100%; padding: 15px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Montserrat', sans-serif; margin-top: 15px;`;
+        
+        renderDaftarExtra();
+        document.getElementById('extra-modal').classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+
+    function tutupModalExtra() {
+        document.getElementById('extra-modal').classList.add('hidden');
+        if(document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) document.body.classList.remove('modal-open');
+    }
+
+    function bukaFormExtra(mode, id = null) {
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        document.getElementById('extra-nama').value = '';
+        document.getElementById('extra-catatan').value = '';
+        document.getElementById('extra-nominal').value = '';
+        document.getElementById('extra-id-edit').value = '';
+        
+        let opts = '';
+        ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'].forEach(w => {
+            opts += `<div class="custom-option" onclick="setCustomVal('extra-wallet','extra-wallet-trigger','extra-wallet-opts','${w}')">${w}</div>`;
+        });
+        document.getElementById('extra-wallet-opts').innerHTML = opts;
+
+        document.getElementById('extra-form-box').style.borderColor = cfg.warna;
+        document.getElementById('extra-form-title').style.color = cfg.warna;
+        document.getElementById('btn-simpan-extra').style.cssText = `background-color: #222222 !important; color: ${cfg.warna} !important; border: 1px solid ${cfg.warna} !important;`;
+
+        if (mode === 'tambah') {
+            document.getElementById('extra-form-title').innerText = `Catat ${cfg.nama} Baru`;
+            document.getElementById('extra-wallet-label').innerText = cfg.lblWallet;
+            document.getElementById('extra-wallet-group').style.display = 'block';
+            setCustomVal('extra-wallet','extra-wallet-trigger','extra-wallet-opts','Tunai');
+        } else if (mode === 'edit') {
+            document.getElementById('extra-form-title').innerText = 'Edit Data';
+            document.getElementById('extra-wallet-group').style.display = 'none';
+            const data = AppState.db[ModeEkstraAktif].find(x => x.id === id);
+            if (data) {
+                document.getElementById('extra-id-edit').value = data.id;
+                document.getElementById('extra-nama').value = data.nama;
+                document.getElementById('extra-catatan').value = data.catatan || '';
+                document.getElementById('extra-nominal').value = data.amount.toLocaleString('id-ID');
+            }
+        }
+        document.getElementById('extra-form-modal').classList.remove('hidden');
+    }
+
+    function simpanExtra() {
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        const idEdit = document.getElementById('extra-id-edit').value;
+        const nama = Utils.toTitleCase(document.getElementById('extra-nama').value.trim());
+        const catatan = document.getElementById('extra-catatan').value.trim();
+        const rawAmount = document.getElementById('extra-nominal').value.trim();
+        const amount = Math.abs(Number(rawAmount.replace(/[^\d]/g, '')));
+        const dompet = document.getElementById('extra-wallet').value;
+        const tglHariIni = Utils.tglHariIni();
+
+        if (!nama || rawAmount === '' || isNaN(amount) || amount <= 0) {
+            return showPopup('alert', 'Isi Nama dan Nominal dengan benar!', cfg.warna);
+        }
+        
+        const fullDesc = cfg.descMsk + nama + (catatan ? " - " + catatan : "");
+
+        if (idEdit) {
+            const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === idEdit);
+            if (dataExt) {
+                const trxData = AppState.db[cfg.msk].find(x => x.id === dataExt[cfg.idTrx]);
+                const dompetLama = trxData ? trxData.wallet : 'Tunai';
+                const selisih = dataExt.amount - amount;
+
+                if (cfg.msk === 'income' && selisih > 0 && getSaldoDompet(dompetLama) < selisih) {
+                    return showPopup('alert', `Batal: Saldo [${dompetLama}] sudah terpakai sebagian!`, 'var(--danger)');
+                }
+                if (cfg.msk === 'expense' && selisih < 0 && getSaldoDompet(dompetLama) < Math.abs(selisih)) {
+                    return showPopup('alert', `Batal: Saldo [${dompetLama}] tidak cukup untuk menambah tagihan!`, 'var(--danger)');
+                }
+
+                dataExt.nama = nama;
+                dataExt.catatan = catatan;
+                dataExt.amount = amount;
+                if (trxData) { trxData.desc = fullDesc; trxData.amount = amount; }
+            }
+        } else {
+            if (cfg.msk === 'expense' && getSaldoDompet(dompet) < amount) {
+                return showPopup('alert', `Batal: Saldo [${dompet}] tidak cukup!`, 'var(--danger)');
+            }
+
+            const idBaru = Utils.buatId(), idTrx = Utils.buatId();
+            AppState.db[cfg.msk].push({ id: idTrx, date: tglHariIni, desc: fullDesc, amount: amount, wallet: dompet, plotId: null });
+
+            let entryBaru = { id: idBaru, nama: nama, catatan: catatan, amount: amount, dateIn: tglHariIni, status: 'aktif' };
+            entryBaru[cfg.idTrx] = idTrx;
+            AppState.db[ModeEkstraAktif].push(entryBaru);
+        }
+
+        simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+        document.getElementById('extra-form-modal').classList.add('hidden');
+        renderDaftarExtra();
+    }
+
+    function bukaSelesaiExtra(id) {
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        const data = AppState.db[ModeEkstraAktif].find(x => x.id === id);
+        if (!data) return;
+
+        document.getElementById('extra-id-selesai').value = id;
+        document.getElementById('extra-selesai-nama').innerText = data.nama + " (" + Utils.formatRp(data.amount) + ")";
+        document.getElementById('extra-selesai-desc').innerText = cfg.teksSelesai;
+        document.getElementById('extra-selesai-title').innerText = `Selesaikan ${cfg.nama}`;
+        
+        document.getElementById('extra-selesai-box').style.borderColor = cfg.warna;
+        document.getElementById('extra-selesai-title').style.color = cfg.warna;
+        
+        const btnProses = document.getElementById('btn-proses-selesai-extra');
+        btnProses.innerText = cfg.btn;
+        btnProses.style.cssText = `background-color: #222222 !important; color: ${cfg.warna} !important; border: 1px solid ${cfg.warna} !important;`;
+        document.getElementById('btn-batal-selesai-extra').style.cssText = `background-color: #222222 !important; color: ${cfg.warna} !important; border: 1px solid ${cfg.warna} !important;`;
+
+        let opts = '';
+        ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'].forEach(w => {
+            const bal = getSaldoDompet(w);
+            opts += `<div class="custom-option" onclick="setCustomVal('extra-selesai-wallet','extra-selesai-wallet-trigger','extra-selesai-wallet-opts','${w}')">${w} (Rp ${bal.toLocaleString('id-ID')})</div>`;
+        });
+        document.getElementById('extra-selesai-wallet-opts').innerHTML = opts;
+        setCustomVal('extra-selesai-wallet','extra-selesai-wallet-trigger','extra-selesai-wallet-opts','Tunai');
+        
+        document.getElementById('extra-selesai-modal').classList.remove('hidden');
+    }
+
+    function prosesSelesaiExtra(event) {
+        const btn = event.target;
+        btn.disabled = true; setTimeout(() => btn.disabled = false, 1500);
+
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        const id = document.getElementById('extra-id-selesai').value;
+        const dompet = document.getElementById('extra-selesai-wallet').value;
+        const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === id);
+        
+        if (!dataExt) return;
+
+        if (cfg.klr === 'expense' && getSaldoDompet(dompet) < dataExt.amount) {
+            return showPopup('alert', `Batal: Saldo ${dompet} kurang! Pindah uang dulu.`, 'var(--danger)');
+        }
+
+        const waktu = new Date();
+        const tglStr = `${waktu.getDate()} ${BlnPdk[waktu.getMonth()]} ${waktu.getFullYear()}`;
+        
+        dataExt.status = 'selesai';
+        dataExt.dateOut = `Lunas pada: ${tglStr}`;
+
+        AppState.db[cfg.klr].push({
+            id: Utils.buatId(), date: Utils.tglHariIni(), desc: cfg.descKlr + dataExt.nama, amount: dataExt.amount, wallet: dompet, plotId: null
+        });
+
+        simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+        document.getElementById('extra-selesai-modal').classList.add('hidden');
+        renderDaftarExtra();
+    }
+
+    function hapusExtra(id) {
+        const cfg = DB_EKSTRA[ModeEkstraAktif];
+        showPopup('delete', `Hapus riwayat ${cfg.nama.toLowerCase()} ini dari daftar?\n(Data Pemasukan/Pengeluarannya yang lalu akan tetap aman di Rekap)`, '#ffffff', () => {
+            AppState.db[ModeEkstraAktif] = AppState.db[ModeEkstraAktif].filter(x => x.id !== id);
+            simpanDatabase(); renderDaftarExtra();
+        });
     }
 
     window.addEventListener('DOMContentLoaded', () => { 
