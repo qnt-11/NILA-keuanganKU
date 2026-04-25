@@ -253,7 +253,7 @@
            10. ABOUT MODAL
         ========================================================= */
         #about-modal .modal-box { padding: 30px 20px; text-align: center; max-height: 85vh; width: 90%; max-width: 350px; position: relative; }
-        .about-glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; padding: 25px 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .about-glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         /* =========================================================
            11. CUSTOM PICKER
@@ -434,7 +434,7 @@
                     </div>
                 </div>
 
-                <small class="audiowide-regular" style="font-size: 9px; letter-spacing: 1px; color:#888;">SISA SALDO GLOBAL</small>
+                <small id="label-sisa-saldo" class="audiowide-regular" style="font-size: 9px; letter-spacing: 1px; color:#888;">SISA SALDO GLOBAL</small>
                 <h2 id="total-balance">Rp 0</h2>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 6px;">
@@ -554,20 +554,31 @@
         </div>
         
         <div style="font-size: 13px; line-height: 1.6; color: #ffffff; font-family: 'Montserrat', sans-serif;">
-            <div class="about-glass-card">
+            <div class="about-glass-card" style="padding: 20px 15px;">
+                <div style="font-size: 24px; margin-bottom: 10px; text-align: center;">💌</div>
+                <p style="text-align: center; color: var(--text-light); font-size: 12px; margin-top: 0; margin-bottom: 8px; line-height: 1.5;">Diciptakan secara khusus dan eksklusif untuk istriku tercinta,</p>
+                <h3 class="audiowide-regular" style="color: var(--wa-pink); font-size: 16px; margin: 10px 0; text-align: center; letter-spacing: 1px; text-shadow: 0 0 10px rgba(255,105,180,0.5);">NILA RIZKI PERMATASARI.</h3>
+                <p style="text-align: center; color: var(--text-muted); font-size: 11px; font-style: italic; margin-bottom: 0;">"Semoga aplikasi ini bisa mempermudah kamu dalam mengatur keuangan rumah tangga kita, menjadikannya lebih rapi, terkontrol, dan selalu membawa keberkahan."</p>
+            </div>
+
+            <div class="about-glass-card" style="margin-top: 15px;">
                 <p style="text-align: center; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; margin-top: 0; margin-bottom: 8px; font-size: 9px;">DEVELOPED BY</p>
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <strong class="audiowide-regular" style="color: #ffffff; font-size: 17px; display: block; line-height: 1.4; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Ginanjar Wahyu RHP</strong>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <strong class="audiowide-regular" style="color: #ffffff; font-size: 15px; display: block; line-height: 1.4; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Ginanjar Wahyu RHP</strong>
                 </div>
                 
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.401l8.073-4.908c1.618-1.214 3.927-.059 3.927 1.964z"/><path fill="#34A853" d="M20.182 21H24v-9.273z"/><path fill="#FBBC05" d="M0 11.727V21h3.818v-9.273z"/><path fill="#4285F4" d="M12 16.636l6.545-4.908V5.457L12 10.364z"/><path fill="#EA4335" d="M3.818 5.457L12 10.364 20.182 5.457v6.271z"/></svg>
-                        <span style="font-weight: 600; font-size: 12px; letter-spacing: 0.5px;">n_dazmoe@yahoo.com</span>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="#6001D2" xmlns="http://www.w3.org/2000/svg"><path d="M22.775 5.564c-.035-.386-.164-.75-.373-1.057-.21-.307-.492-.547-.818-.696-.326-.15-.685-.205-1.043-.16-.358.046-.702.193-.997.426l-7.545 6.037L4.456 4.077c-.295-.233-.64-.38-.997-.426-.358-.045-.717.01-1.043.16-.326.15-.608.39-.818.696-.21.307-.338.67-.373 1.057-.034.386.027.778.178 1.135l6.574 10.638v6.234h8.046v-6.234l6.574-10.638c.15-.357.212-.749.178-1.135z"/></svg>
+                        <span style="font-weight: 500; font-size: 11px; letter-spacing: 0.5px;">n_dazmoe@yahoo.com</span>
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                        <span style="font-weight: 600; font-size: 12px; letter-spacing: 0.5px;">github.com/qnt-11</span>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.401l8.073-4.908c1.618-1.214 3.927-.059 3.927 1.964z"/><path fill="#34A853" d="M20.182 21H24v-9.273z"/><path fill="#FBBC05" d="M0 11.727V21h3.818v-9.273z"/><path fill="#4285F4" d="M12 16.636l6.545-4.908V5.457L12 10.364z"/><path fill="#EA4335" d="M3.818 5.457L12 10.364 20.182 5.457v6.271z"/></svg>
+                        <span style="font-weight: 500; font-size: 11px; letter-spacing: 0.5px;">nd4zmoe@gmail.com</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        <span style="font-weight: 500; font-size: 11px; letter-spacing: 0.5px;">github.com/qnt-11</span>
                     </div>
                 </div>
             </div>
@@ -688,8 +699,8 @@
     // =========================================================
     // 1. PENGATURAN AWAL & VARIABEL GLOBAL
     // =========================================================
-    const APP_VERSION = "1.00"; 
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyb_E0cL3_bMSlFHQ68KbahPI6FzoNsZRLGzFCExumIsWsmRqygB0p8KOwn2k4LbIQa/exec";
+    const APP_VERSION = "1.1"; 
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzSNn6lfYFUGhVlxT-fqGYnbpSf-lKSCcI7vN4cCo7jSfcYBhdAb8xVvPkhWeS1dxt6/exec;
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => console.error("SW tidak ditemukan."));
@@ -892,7 +903,7 @@
     });
 
     // =========================================================
-    // 5. MANAJEMEN POPUP & MODAL
+    // 5. MANAJEMEN POPUP, MODAL & PIN
     // =========================================================
     function showPopup(mode, pesan, warnaTema = '#ffffff', callback = null, nilaiAwal = null, isAngka = false) {
         const overlay = document.getElementById('custom-modal'), 
@@ -904,6 +915,8 @@
               loader = document.getElementById('modal-loader'),
               modalBox = overlay.querySelector('.modal-box');
         
+        input.type = 'text';
+
         document.body.classList.add('modal-open');
         teks.innerText = pesan; 
         overlay.classList.remove('hidden');
@@ -930,6 +943,7 @@
         btnBatal.onclick = null;
 
         const closeFunc = () => { 
+            input.type = 'text';
             overlay.classList.add('hidden'); 
             if(document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) {
                 document.body.classList.remove('modal-open'); 
@@ -938,6 +952,15 @@
 
         if (mode === 'loading') {
             if(loader) loader.classList.remove('hidden');
+        } else if (mode === 'pin') {
+            btnBatal.classList.remove('hidden'); 
+            btnOk.classList.remove('hidden');
+            input.classList.remove('hidden');
+            input.type = 'password';
+            input.inputMode = 'numeric';
+            btnOk.innerText = "VERIFIKASI";
+            btnOk.onclick = () => { closeFunc(); if(callback) callback(input.value); };
+            btnBatal.onclick = () => closeFunc();
         } else if (mode === 'delete' || mode === 'reverse') {
             btnBatal.classList.remove('hidden'); 
             btnOk.classList.remove('hidden');
@@ -964,6 +987,16 @@
                 btnOk.onclick = () => { closeFunc(); if(callback) callback(); };
             }
         }
+    }
+
+    function verifyPin(callback) {
+        showPopup('pin', 'Masukkan PIN Keamanan 🔒:', 'var(--danger)', (val) => {
+            if (val === '170823') {
+                if (callback) callback();
+            } else {
+                showPopup('alert', 'Batal: PIN Salah!', 'var(--danger)');
+            }
+        });
     }
 
     function openAboutModal() { 
@@ -1414,7 +1447,7 @@
         const rawAmount = amountEl.value.trim();
         const nom = Math.abs(Number(rawAmount.replace(/[^\d]/g, '')));
         const dmp = walletEl.value;
-        const plt = plotEl ? plotEl.value : null;
+        const plt = plotEl ? (plotEl.value || "") : "";
         
         const warnaTema = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
 
@@ -1424,9 +1457,7 @@
             if (getSaldoDompet(dmp) < nom) return showPopup('alert', `Saldo [${dmp}] tidak mencukupi!`, warnaTema);
             
             if (dmp === 'Dana Darurat 🔒') {
-                return showPopup('confirm', `Peringatan! Anda akan mengeluarkan uang dari [Dana Darurat 🔒].\nLanjutkan?`, warnaTema, () => {
-                    prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx);
-                });
+                return verifyPin(() => prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx));
             }
         }
         
@@ -1437,13 +1468,13 @@
         if (tipe === 'mutations') return showPopup('alert', "Mutasi tidak bisa diedit. Hapus (✖) dan buat ulang.", '#ffffff');
         
         if (tipe === 'income') {
-            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem && t.status === 'aktif');
-            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem && h.status === 'aktif');
-            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah riwayat Titipan/Hutang yang masih aktif! Silakan Edit nominal/nama melalui Menu Ekstra (Titik 3).', 'var(--danger)');
+            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem);
+            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem);
+            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah riwayat Titipan/Hutang! Silakan kelola melalui Menu Ekstra (Titik Tiga).', 'var(--danger)');
         }
         if (tipe === 'expense') {
-            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem && p.status === 'aktif');
-            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah riwayat Piutang yang masih aktif! Silakan Edit nominal/nama melalui Menu Ekstra (Titik 3).', 'var(--danger)');
+            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem);
+            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah riwayat Piutang! Silakan kelola melalui Menu Ekstra (Titik Tiga).', 'var(--danger)');
         }
 
         const data = AppState.db[tipe].find(i => i.id === idItem);
@@ -1491,7 +1522,7 @@
             const dompetBaru = document.getElementById('edit-wallet').value;
             const tglBaru = document.getElementById('edit-date').dataset.rawDate;
             const descBaru = Utils.toTitleCase(document.getElementById('edit-desc').value.trim());
-            const plotBaru = document.getElementById('edit-plot-val').value || null;
+            const plotBaru = document.getElementById('edit-plot-val').value || "";
             
             if (!descBaru) return showPopup('alert', "Keterangan tidak boleh kosong!", titleColor);
 
@@ -1513,12 +1544,23 @@
             }
 
             if (!saldoAman) return showPopup('alert', pesanError, titleColor);
+
+            const butuhPin = (dompetLama === 'Dana Darurat 🔒' || dompetBaru === 'Dana Darurat 🔒');
             
-            data.amount = nomBaru; data.wallet = dompetBaru; data.date = tglBaru; data.desc = descBaru; data.plotId = plotBaru; 
-            simpanDatabase(); 
-            document.getElementById('edit-modal').classList.add('hidden');
-            if(document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) document.body.classList.remove('modal-open');
-            updateRekap(); updatePlotList(); updateWalletDropdownBalances();
+            const execEdit = () => {
+                data.amount = nomBaru; data.wallet = dompetBaru; data.date = tglBaru; data.desc = descBaru; data.plotId = plotBaru; 
+                simpanDatabase(); 
+                document.getElementById('edit-modal').classList.add('hidden');
+                if(document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) document.body.classList.remove('modal-open');
+                updateRekap(); updatePlotList(); updateWalletDropdownBalances();
+            };
+
+            if (butuhPin) {
+                document.getElementById('edit-modal').classList.add('hidden');
+                verifyPin(execEdit);
+            } else {
+                execEdit();
+            }
         };
     }
 
@@ -1527,27 +1569,37 @@
         const dataTarget = AppState.db[tipe].find(x => x.id === idItem);
         
         if (tipe === 'income') {
-            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem && t.status === 'aktif');
-            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem && h.status === 'aktif');
-            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah Uang Titipan/Hutang yang masih aktif! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
+            const isTitipan = AppState.db.titipan.some(t => t.incomeId === idItem);
+            const isHutang = AppState.db.hutang.some(h => h.incomeId === idItem);
+            if (isTitipan || isHutang) return showPopup('alert', 'Batal: Ini adalah Uang Titipan/Hutang! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
 
             const kekur = getSaldoDompet(dataTarget.wallet) - dataTarget.amount;
             if (kekur < 0) return showPopup('alert', `Batal: Saldo dompet kurang ${Utils.formatRp(Math.abs(kekur))}!`, '#ffffff');
         }
         
         if (tipe === 'expense') {
-            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem && p.status === 'aktif');
-            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah Uang Piutang yang masih aktif! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
+            const isPiutang = AppState.db.piutang.some(p => p.expenseId === idItem);
+            if (isPiutang) return showPopup('alert', 'Batal: Ini adalah Uang Piutang! Selesaikan atau hapus lewat Menu Titik Tiga.', 'var(--danger)');
         }
         
         if (tipe === 'mutations') {
             const kekur = getSaldoDompet(dataTarget.to) - dataTarget.amount;
             if (kekur < 0) return showPopup('alert', `Batal: Uang tujuan terlanjur dipakai, kurang ${Utils.formatRp(Math.abs(kekur))}!`, '#ffffff');
         }
+
+        const butuhPin = (dataTarget.wallet === 'Dana Darurat 🔒' || dataTarget.from === 'Dana Darurat 🔒' || dataTarget.to === 'Dana Darurat 🔒');
         
         showPopup('delete', "HAPUS RIWAYAT INI?", '#ffffff', () => {
-            AppState.db[tipe] = AppState.db[tipe].filter(x => x.id !== idItem);
-            simpanDatabase(); updateRekap(); updatePlotList(); updateWalletDropdownBalances();
+            const proceedDelete = () => {
+                AppState.db[tipe] = AppState.db[tipe].filter(x => x.id !== idItem);
+                simpanDatabase(); updateRekap(); updatePlotList(); updateWalletDropdownBalances();
+            };
+
+            if (butuhPin) {
+                setTimeout(() => verifyPin(proceedDelete), 200); 
+            } else {
+                proceedDelete();
+            }
         });
     }
 
@@ -1601,9 +1653,7 @@
 
         if (asal === 'Dana Darurat 🔒') {
             closeMutationModal();
-            showPopup('confirm', 'ANDA YAKIN MENGAMBIL DANA DARURAT 🔒?', 'var(--danger)', () => {
-                executeTransfer();
-            });
+            verifyPin(executeTransfer);
         } else {
             executeTransfer();
         }
@@ -1760,22 +1810,31 @@
         const tglEnd = endEl.dataset.rawDate || '2100-01-01';
         
         const kunciRaw = document.getElementById('rekap-search').value.trim();
-        const kunciBersih = kunciRaw.replace(/[^\d]/g, '');
               
         const elMasuk = document.getElementById('list-income');
         const elKeluar = document.getElementById('list-expense');
               
         const scrollIn = elMasuk.scrollTop;
         const scrollOut = elKeluar.scrollTop;
+
+        const labelSisa = document.getElementById('label-sisa-saldo');
+        const h2Sisa = document.getElementById('total-balance');
+        const badgeEl = document.getElementById('health-badge');
               
         if (kunciRaw) { 
             document.getElementById('rekap-focus-hide').classList.add('hidden'); 
             document.getElementById('clear-search-btn').classList.remove('hidden'); 
             document.getElementById('label-bulan-pencarian').innerText = "HASIL PENCARIAN:"; 
+            if(labelSisa) labelSisa.style.display = 'none';
+            if(h2Sisa) h2Sisa.style.display = 'none';
+            if(badgeEl) badgeEl.style.display = 'none';
         } else { 
             document.getElementById('rekap-focus-hide').classList.remove('hidden'); 
             document.getElementById('clear-search-btn').classList.add('hidden');
             document.getElementById('label-bulan-pencarian').innerText = "RENTANG WAKTU:";
+            if(labelSisa) labelSisa.style.display = 'block';
+            if(h2Sisa) h2Sisa.style.display = 'block';
+            if(badgeEl) badgeEl.style.display = '';
         }
         
         const searchTerms = kunciRaw.toLowerCase().split(' ').filter(t => t.trim() !== '');
@@ -1786,9 +1845,6 @@
             ...AppState.db.mutations.map(m => ({...m, type:'mutations', desc:`Mutasi: ${m.from} ➔ ${m.to}`, walletInfo: `Transfer`}))
         ].filter(item => {
             if (kunciRaw) {
-                const isExactNum = kunciBersih !== '' && Math.round(item.amount) === Number(kunciBersih);
-                if (isExactNum) return true;
-
                 const combinedStr = `${item.desc} ${item.walletInfo} ${item.date} ${item.amount}`.toLowerCase();
                 return searchTerms.every(term => combinedStr.includes(term));
             }
@@ -1852,7 +1908,6 @@
         
         const sTotal = sTunai + sBank + sEwal + sDarurat1 + sDarurat2;
 
-        const badgeEl = document.getElementById('health-badge');
         if (badgeEl) {
             if (hitungMasukBulanIni === 0 && hitungKeluarBulanIni === 0) {
                 badgeEl.innerText = "➖ Belum Ada Transaksi";
@@ -2052,7 +2107,11 @@
         if (typeof val === 'string') { 
             let p = val.split(/[-/]/); 
             if (p.length === 3) { 
-                if (p[2].length === 4) return parseInt(p[0]) > 12 ? `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}` : `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; 
+                if (p[2].length === 4) {
+                    let m = parseInt(p[1], 10);
+                    if (m > 12) return `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+                    return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                }
                 if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`; 
             } 
         }
@@ -2101,11 +2160,11 @@
             }); 
         }
 
-        if(AppState.tempImportTitipan && AppState.tempImportTitipan.length > 0) AppState.db.titipan = AppState.tempImportTitipan;
-        if(AppState.tempImportHutang && AppState.tempImportHutang.length > 0) AppState.db.hutang = AppState.tempImportHutang;
-        if(AppState.tempImportPiutang && AppState.tempImportPiutang.length > 0) AppState.db.piutang = AppState.tempImportPiutang;
-        
         if (mode === 'semua') {
+            if(AppState.tempImportTitipan && AppState.tempImportTitipan.length > 0) AppState.db.titipan = AppState.tempImportTitipan;
+            if(AppState.tempImportHutang && AppState.tempImportHutang.length > 0) AppState.db.hutang = AppState.tempImportHutang;
+            if(AppState.tempImportPiutang && AppState.tempImportPiutang.length > 0) AppState.db.piutang = AppState.tempImportPiutang;
+
             AppState.tempImport.forEach(r => {
                 const d = parseExcelDate(r.Tanggal);
                 if (!d) return;
@@ -2128,7 +2187,7 @@
                 }
                 if (tipe === 'KREDIT') {
                     const idx = AppState.db.expense.findIndex(e => e.id === id);
-                    const newData = { id, date: d, desc: Utils.toTitleCase(r.Keterangan || '-'), amount: nom, wallet: dompetAsal, plotId: r.PlotID || null };
+                    const newData = { id, date: d, desc: Utils.toTitleCase(r.Keterangan || '-'), amount: nom, wallet: dompetAsal, plotId: r.PlotID || "" };
                     if(idx >= 0) AppState.db.expense[idx] = newData; else AppState.db.expense.push(newData);
                 }
                 if (tipe === 'MUTASI') {
@@ -2138,6 +2197,10 @@
                 }
             });
         } else {
+            AppState.db.titipan = [];
+            AppState.db.hutang = [];
+            AppState.db.piutang = [];
+
             let kalk = { 'Tunai': 0, 'Bank': 0, 'e-Wallet': 0, 'Dana Darurat': 0 };
             AppState.tempImport.forEach(r => { 
                 let rawNom = String(r.Jumlah).replace(/\./g, '').replace(/,/g, '.');
@@ -2403,6 +2466,9 @@
         const ul = document.getElementById('list-extra');
         if (!AppState.db[ModeEkstraAktif]) AppState.db[ModeEkstraAktif] = [];
         
+        const activeTotal = AppState.db[ModeEkstraAktif].filter(x => x.status === 'aktif').reduce((sum, x) => sum + x.amount, 0);
+        document.getElementById('extra-modal-title').innerText = `Daftar ${cfg.nama} (Total: ${Utils.formatRp(activeTotal)})`;
+
         if (AppState.db[ModeEkstraAktif].length === 0) {
             ul.innerHTML = `<li style="text-align:center; padding: 30px 0; color:var(--border-color); font-size:11px;">- Belum ada ${cfg.nama.toLowerCase()} -</li>`;
             return;
@@ -2449,7 +2515,6 @@
         const cfg = DB_EKSTRA[tipe];
         document.getElementById('extra-dropdown').classList.add('hidden');
         
-        document.getElementById('extra-modal-title').innerText = `Daftar ${cfg.nama}`;
         document.getElementById('extra-modal-title').style.color = cfg.warna;
         document.getElementById('extra-modal-box').style.borderColor = cfg.warna;
         
@@ -2510,7 +2575,6 @@
         const catatan = document.getElementById('extra-catatan').value.trim();
         const rawAmount = document.getElementById('extra-nominal').value.trim();
         const amount = Math.abs(Number(rawAmount.replace(/[^\d]/g, '')));
-        const dompet = document.getElementById('extra-wallet').value;
         const tglHariIni = Utils.tglHariIni();
 
         if (!nama || rawAmount === '' || isNaN(amount) || amount <= 0) {
@@ -2518,42 +2582,60 @@
         }
         
         const fullDesc = cfg.descMsk + nama + (catatan ? " - " + catatan : "");
+        let dompetAktual = document.getElementById('extra-wallet').value;
 
         if (idEdit) {
             const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === idEdit);
-            if (dataExt) {
-                const trxData = AppState.db[cfg.msk].find(x => x.id === dataExt[cfg.idTrx]);
-                const dompetLama = trxData ? trxData.wallet : 'Tunai';
-                const selisih = dataExt.amount - amount;
-
-                if (cfg.msk === 'income' && selisih > 0 && getSaldoDompet(dompetLama) < selisih) {
-                    return showPopup('alert', `Batal: Saldo [${dompetLama}] sudah terpakai sebagian!`, 'var(--danger)');
-                }
-                if (cfg.msk === 'expense' && selisih < 0 && getSaldoDompet(dompetLama) < Math.abs(selisih)) {
-                    return showPopup('alert', `Batal: Saldo [${dompetLama}] tidak cukup untuk menambah tagihan!`, 'var(--danger)');
-                }
-
-                dataExt.nama = nama;
-                dataExt.catatan = catatan;
-                dataExt.amount = amount;
-                if (trxData) { trxData.desc = fullDesc; trxData.amount = amount; }
-            }
-        } else {
-            if (cfg.msk === 'expense' && getSaldoDompet(dompet) < amount) {
-                return showPopup('alert', `Batal: Saldo [${dompet}] tidak cukup!`, 'var(--danger)');
-            }
-
-            const idBaru = Utils.buatId(), idTrx = Utils.buatId();
-            AppState.db[cfg.msk].push({ id: idTrx, date: tglHariIni, desc: fullDesc, amount: amount, wallet: dompet, plotId: null });
-
-            let entryBaru = { id: idBaru, nama: nama, catatan: catatan, amount: amount, dateIn: tglHariIni, status: 'aktif' };
-            entryBaru[cfg.idTrx] = idTrx;
-            AppState.db[ModeEkstraAktif].push(entryBaru);
+            const trxData = dataExt ? AppState.db[cfg.msk].find(x => x.id === dataExt[cfg.idTrx]) : null;
+            if (trxData) dompetAktual = trxData.wallet;
         }
 
-        simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
-        document.getElementById('extra-form-modal').classList.add('hidden');
-        renderDaftarExtra();
+        const butuhPin = (dompetAktual === 'Dana Darurat 🔒');
+
+        const execSimpanExtra = () => {
+            if (idEdit) {
+                const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === idEdit);
+                if (dataExt) {
+                    const trxData = AppState.db[cfg.msk].find(x => x.id === dataExt[cfg.idTrx]);
+                    const dompetLama = trxData ? trxData.wallet : 'Tunai';
+                    const selisih = dataExt.amount - amount;
+
+                    if (cfg.msk === 'income' && selisih > 0 && getSaldoDompet(dompetLama) < selisih) {
+                        return showPopup('alert', `Batal: Saldo [${dompetLama}] sudah terpakai sebagian!`, 'var(--danger)');
+                    }
+                    if (cfg.msk === 'expense' && selisih < 0 && getSaldoDompet(dompetLama) < Math.abs(selisih)) {
+                        return showPopup('alert', `Batal: Saldo [${dompetLama}] tidak cukup untuk menambah tagihan!`, 'var(--danger)');
+                    }
+
+                    dataExt.nama = nama;
+                    dataExt.catatan = catatan;
+                    dataExt.amount = amount;
+                    if (trxData) { trxData.desc = fullDesc; trxData.amount = amount; }
+                }
+            } else {
+                if (cfg.msk === 'expense' && getSaldoDompet(dompetAktual) < amount) {
+                    return showPopup('alert', `Batal: Saldo [${dompetAktual}] tidak cukup!`, 'var(--danger)');
+                }
+
+                const idBaru = Utils.buatId(), idTrx = Utils.buatId();
+                AppState.db[cfg.msk].push({ id: idTrx, date: tglHariIni, desc: fullDesc, amount: amount, wallet: dompetAktual, plotId: "" });
+
+                let entryBaru = { id: idBaru, nama: nama, catatan: catatan, amount: amount, dateIn: tglHariIni, status: 'aktif' };
+                entryBaru[cfg.idTrx] = idTrx;
+                AppState.db[ModeEkstraAktif].push(entryBaru);
+            }
+
+            simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+            document.getElementById('extra-form-modal').classList.add('hidden');
+            renderDaftarExtra();
+        };
+
+        if (butuhPin) {
+            document.getElementById('extra-form-modal').classList.add('hidden');
+            verifyPin(execSimpanExtra);
+        } else {
+            execSimpanExtra();
+        }
     }
 
     function bukaSelesaiExtra(id) {
@@ -2600,19 +2682,28 @@
             return showPopup('alert', `Batal: Saldo ${dompet} kurang! Pindah uang dulu.`, 'var(--danger)');
         }
 
-        const waktu = new Date();
-        const tglStr = `${waktu.getDate()} ${BlnPdk[waktu.getMonth()]} ${waktu.getFullYear()}`;
-        
-        dataExt.status = 'selesai';
-        dataExt.dateOut = `Lunas pada: ${tglStr}`;
+        const execProsesSelesai = () => {
+            const waktu = new Date();
+            const tglStr = `${waktu.getDate()} ${BlnPdk[waktu.getMonth()]} ${waktu.getFullYear()}`;
+            
+            dataExt.status = 'selesai';
+            dataExt.dateOut = `Lunas pada: ${tglStr}`;
 
-        AppState.db[cfg.klr].push({
-            id: Utils.buatId(), date: Utils.tglHariIni(), desc: cfg.descKlr + dataExt.nama, amount: dataExt.amount, wallet: dompet, plotId: null
-        });
+            AppState.db[cfg.klr].push({
+                id: Utils.buatId(), date: Utils.tglHariIni(), desc: cfg.descKlr + dataExt.nama, amount: dataExt.amount, wallet: dompet, plotId: ""
+            });
 
-        simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
-        document.getElementById('extra-selesai-modal').classList.add('hidden');
-        renderDaftarExtra();
+            simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+            document.getElementById('extra-selesai-modal').classList.add('hidden');
+            renderDaftarExtra();
+        };
+
+        if (cfg.klr === 'expense' && dompet === 'Dana Darurat 🔒') {
+            document.getElementById('extra-selesai-modal').classList.add('hidden');
+            verifyPin(execProsesSelesai);
+        } else {
+            execProsesSelesai();
+        }
     }
 
     function hapusExtra(id) {
