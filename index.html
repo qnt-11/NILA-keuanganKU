@@ -68,7 +68,6 @@
         header .title-fam { font-size: 10px; letter-spacing: 0px; display: flex; margin-right: 0px;}
         header .title-barla { font-size: 18px; letter-spacing: 1px; display: flex; color: #f0f0f0; text-shadow: 0 0 2px rgba(255,255,255,0.3);}
         
-        /* Jam Abu-abu, diperkecil & translateZ untuk menghindari glitch */
         .clock-text { font-size: 9px; color: var(--text-muted); font-weight: 600; margin-top: 2px; letter-spacing: 0.2px; font-family: 'Montserrat', sans-serif; transform: translateZ(0); white-space: nowrap;}
         .blink-sep { animation: blinkHUD 1s step-start infinite; }
         @keyframes blinkHUD { 50% { opacity: 0.1; } }
@@ -89,7 +88,6 @@
         @media (hover: hover) { .icon-btn:hover { background-color: rgba(255,255,255,0.1); } }
         .icon-btn:active { transform: scale(0.9); opacity: 0.8; } 
 
-        /* Ukuran ikon X diperkecil & padding dikurangi */
         .delete-btn-wrapper { padding: 8px; margin: -8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .svg-x { width: 16px; height: 16px; stroke: var(--danger); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s; cursor: pointer; }
         
@@ -145,7 +143,6 @@
         
         .tab.active { font-weight: 800; transform: scale(1.08); }
         .tab-debit.active { color: var(--wa-green); text-shadow: 0 0 10px rgba(0, 200, 83, 0.6); }
-        /* Warna tab PLOT diubah jadi biru bank */
         .tab-plot.active { color: var(--wa-blue); text-shadow: 0 0 10px rgba(0, 191, 255, 0.6); } 
         .tab-kredit.active { color: var(--danger); text-shadow: 0 0 10px rgba(255, 59, 48, 0.6); }
         .tab-rekap.active { color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
@@ -222,6 +219,7 @@
         .btn-white { color: #ffffff !important; border: 1px solid #ffffff !important; }
         .btn-cloud { color: var(--cloud) !important; border: 1px solid var(--cloud) !important; }
         .btn-blue { color: var(--wa-blue) !important; border: 1px solid var(--wa-blue) !important; }
+
         /* =========================================================
            7. REKAP & SALDO DOMPET
         ========================================================= */
@@ -241,20 +239,15 @@
         .wallet-card.area-darurat2 { grid-area: darurat2; }
 
         /* =========================================================
-           8. DAFTAR RIWAYAT & MASKING KABUT
+           8. DAFTAR RIWAYAT (SUDAH DIOPTIMASI ANTI-LAG)
         ========================================================= */
         .history-columns { display: flex; gap: 8px; flex: 1; min-height: 0; flex-shrink: 1; width: 100%;}
         .history-col { flex: 1; background: var(--wa-card); border-radius: 12px; padding: 8px; padding-bottom: 0; border: 1px solid var(--border-color); display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; overflow-x: hidden; }
         #history-debit h4 { color: var(--wa-green); border-bottom: 1px solid var(--border-color); background-color: transparent !important; }
         #history-kredit h4 { color: var(--danger); border-bottom: 1px solid var(--border-color); background-color: transparent !important; }
         .history-col h4 { margin: 0 0 6px 0; padding: 0 0 6px 0; text-align: center; font-size: 12px; text-transform: uppercase; } 
-        
-        .history-col ul, #plot-list, .titipan-list { 
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-        }
 
-        .history-col ul { list-style: none; padding: 0; margin: 0; overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; padding-bottom: 40px; padding-top: 15px; } 
+        .history-col ul { list-style: none; padding: 0; margin: 0; overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; padding-bottom: 40px; padding-top: 5px; } 
         .history-col ul::-webkit-scrollbar { width: 3px; }
         .history-col ul::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
         .history-col li { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border-color); gap: 12px; }
@@ -336,9 +329,6 @@
         @media (hover: hover) { .picker-item:hover { background: rgba(255,255,255,0.1); } }
         .picker-item:active { transform: scale(0.9); }
         .picker-item.selected { font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.5);} 
-
-        /* Watermark dihapus (tidak ada kelas .creator-watermark lagi) */
-
         /* =========================================================
            12. EKSTRA LIST CSS (Group & Cicilan)
         ========================================================= */
@@ -510,6 +500,7 @@
             <button class="btn-main btn-red audiowide-regular" id="btn-save-out" onclick="saveData(event, 'expense')">Simpan Pengeluaran</button>
         </div>
     </div>
+    
     <div id="rekap" class="page hidden">
         <div class="form-group" style="position:relative; margin-bottom: 8px;">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -603,8 +594,16 @@
         </div>
 
         <div class="history-columns">
-            <div class="history-col" id="history-debit"><h4 class="audiowide-regular">DEBIT</h4><ul id="list-income"></ul></div>
-            <div class="history-col" id="history-kredit"><h4 class="audiowide-regular">KREDIT / MUTASI</h4><ul id="list-expense"></ul></div>
+            <div class="history-col" id="history-debit">
+                <h4 class="audiowide-regular">DEBIT</h4>
+                <ul id="list-income"></ul>
+                <div id="load-more-in-container" style="text-align:center;"></div>
+            </div>
+            <div class="history-col" id="history-kredit">
+                <h4 class="audiowide-regular">KREDIT / MUTASI</h4>
+                <ul id="list-expense"></ul>
+                <div id="load-more-out-container" style="text-align:center;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -646,6 +645,7 @@
         </div>
     </div>
 </div>
+
 <div id="cloud-load-modal" class="modal-overlay hidden">
     <div class="modal-box" style="border-color: var(--cloud);">
         <h3 class="audiowide-regular" style="margin-top:0; margin-bottom: 15px; color:var(--cloud); font-size:16px;">☁️ Load Data Cloud</h3>
@@ -766,7 +766,7 @@
     </div>
 </div>
 
-<div id="custom-picker" class="modal-overlay hidden" style="z-index: 20001;">
+<div id="custom-picker" class="modal-overlay hidden" style="z-index: 30000;">
     <div class="picker-box">
         <div class="picker-header"><button class="picker-nav" onclick="cpChange(-1)">&#10094;</button><div id="cp-title" class="picker-title">2026</div><button class="picker-nav" onclick="cpChange(1)">&#10095;</button></div>
         <div id="cp-day-view"><div class="picker-days-header"><span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span></div><div id="cp-grid-days" class="picker-grid"></div></div>
@@ -801,6 +801,11 @@
         <div class="form-group" style="text-align:left;"><label>Nama (Peminjam/Barang)</label><input type="text" id="extra-nama" class="auto-cap" placeholder="Misal: Dona" autocomplete="off"></div>
         <div class="form-group" style="text-align:left;"><label>Keterangan (Opsional)</label><input type="text" id="extra-catatan" class="auto-cap" placeholder="Misal: Cicilan 3 Bulan" autocomplete="off"></div>
         
+        <div class="form-group hidden" style="text-align:left;" id="extra-duedate-group">
+            <label style="color:var(--danger);">Tanggal Jatuh Tempo</label>
+            <input type="text" id="extra-duedate" readonly onclick="openPicker('extra-duedate', 'date', 'var(--danger)')">
+        </div>
+
         <div class="form-group hidden" style="text-align:left;" id="extra-principal-group">
             <label style="color:var(--wa-green);">Uang Cair (Masuk Dompet)</label>
             <input type="text" inputmode="numeric" id="extra-principal" placeholder="0" oninput="Utils.formatRibuanInput(event)">
@@ -874,7 +879,7 @@
     // 1. PENGATURAN AWAL & VARIABEL GLOBAL
     // =========================================================
     const APP_VERSION = "1.50"; 
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyEep1bx0d6WlPdDFDbhkambXcAUe2YmGNf9WaVh2bmhSBl6qHOzw4fhdpusSpW1gBD/exec";
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyyz2jMOkmS803ldsrex-g-WIjwKOYVQ68ZkoyivGzLL34zuaRvcyxYV5VxFn6HUztm/exec";
     try {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch((e) => console.error("SW error:", e));
@@ -886,7 +891,7 @@
     let AppState = {
         db: { income: [], expense: [], mutations: [], plots: [], titipan: [], hutang: [], piutang: [], spaylater: [], spinjam: [] },
         charts: { arusKas: null, portofolio: null },
-        tempImport: [], tempImportPlots: [], tempImportTitipan: [], tempImportSpaylater: [], tempImportSpinjam: [],
+        tempImport: [], tempImportPlots: [], tempImportTitipan: [], tempImportHutang: [], tempImportPiutang: [], tempImportSpaylater: [], tempImportSpinjam: [],
         grafikSaatIni: { in: 0, out: 0, tunai: 0, bank: 0, ewal: 0, darurat1: 0, darurat2: 0, visibleExpenses: [] },
         prevBalances: { total: 0, in: 0, out: 0, tunai: 0, bank: 0, ewal: 0, darurat1: 0, darurat2: 0 }
     };
@@ -894,6 +899,11 @@
     let saldoCache = { valid: false, data: {} };
     let jamTerakhir = "";
     let globalIdCounter = 0;
+    
+    // Variabel Limit Pagination untuk Anti-Lag
+    let limitLunasEkstra = 5; 
+    let limitRekapIn = 15;
+    let limitRekapOut = 15;
 
     // =========================================================
     // 2. SISTEM DATABASE & CACHE SALDO
@@ -1043,7 +1053,6 @@
         obj.animationId = window.requestAnimationFrame(step);
     }
 
-    /* Format Jam Aesthetic, tanpa span warna berlebih karena sudah dikendalikan .clock-text */
     function jalankanJam() {
         const waktu = new Date();
         const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -1400,6 +1409,7 @@
                 
                 try {
                     simpanDatabase(); 
+                    limitRekapIn = 15; limitRekapOut = 15;
                     updateRekap(); 
                     updatePlotList(); 
                     updateWalletDropdownBalances();
@@ -1459,6 +1469,9 @@
             updateWalletDropdownBalances();
 
             showPage(null, 'pemasukan', 0); 
+            
+            limitRekapIn = 15;
+            limitRekapOut = 15;
             updateRekap();
             updatePlotList();
 
@@ -1581,14 +1594,13 @@
         kotakOpsi.innerHTML = opsiHTML;
     }
 
-        function showPage(event, idHalaman, index) {
+    function showPage(event, idHalaman, index) {
         document.getElementById('dropdown-menu').classList.add('hidden');
         document.getElementById('balance-dropdown').classList.add('hidden');
         document.getElementById('extra-dropdown').classList.add('hidden');
         const kebabSvg = document.querySelector('#kebab-btn svg');
         if(kebabSvg) kebabSvg.style.transform = 'rotate(0deg)'; 
 
-        // Atur Kapsul Navigasi
         const slider = document.getElementById('nav-slider');
         if (slider && index !== undefined) {
             let bg = 'rgba(255,255,255,0.15)';
@@ -1620,7 +1632,11 @@
         
         document.getElementById('rekap-search').value = '';
 
-        if (idHalaman === 'rekap') updateRekap();
+        if (idHalaman === 'rekap') {
+            limitRekapIn = 15; 
+            limitRekapOut = 15;
+            updateRekap();
+        }
         if (idHalaman === 'plot') updatePlotList();
         if (idHalaman === 'pengeluaran') {
             buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot');
@@ -1671,6 +1687,7 @@
 
         document.getElementById('balance-dropdown').classList.toggle('hidden'); 
     }
+
     // =========================================================
     // 8. LOGIKA CRUD & PROTEKSI BUG
     // =========================================================
@@ -1694,12 +1711,15 @@
                 dateEl.value = Utils.formatTglTampil(hrIni);
             }
 
+            limitRekapIn = 15; limitRekapOut = 15;
             updateRekap();
             updateWalletDropdownBalances();
             showToast("Catatan berhasil disimpan!", warnaTema); 
         } catch(e) {
             console.error(e);
-            showPopup('alert', "Terjadi kesalahan sistem saat menyimpan.", '#ffffff');
+            // WARNA POPUP DIPERBAIKI (Dinamic mengikuti warna Tema Pemasukan/Pengeluaran)
+            const warnaTemaErr = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
+            showPopup('alert', "Terjadi kesalahan sistem saat menyimpan.", warnaTemaErr);
         }
     }
 
@@ -1747,7 +1767,7 @@
         const isAwal = ekstraTerkait.some(x => x.incomeId === idItem || x.expenseId === idItem);
         const isCicilan = ekstraTerkait.some(x => x.paymentIds && x.paymentIds.includes(idItem));
         
-        if (isAwal || isCicilan) return showPopup('alert', 'Batal: Ini adalah Riwayat Menu Ekstra (Titipan/Hutang/Shopee)! Silakan Edit atau Hapus Cicilan melalui Menu Titik Tiga Kiri.', 'var(--danger)');
+        if (isAwal || isCicilan) return showPopup('alert', 'Batal: Ini adalah Riwayat Menu Ekstra (Titipan/Hutang/Shopee)! Silakan Edit atau Hapus langsung melalui Menu Titik Tiga Kiri.', 'var(--danger)');
 
         const data = AppState.db[tipe].find(i => i.id === idItem);
         if (!data) return;
@@ -1851,17 +1871,20 @@
         
         if (tipe === 'income') {
             const kekur = getSaldoDompet(dataTarget.wallet) - dataTarget.amount;
-            if (kekur < 0) return showPopup('alert', `Batal: Saldo dompet kurang ${Utils.formatRp(Math.abs(kekur))}!`, '#ffffff');
+            // WARNA POPUP DIPERBAIKI: Hapus Pemasukan jadi Merah
+            if (kekur < 0) return showPopup('alert', `Batal: Saldo dompet kurang ${Utils.formatRp(Math.abs(kekur))}!`, 'var(--danger)');
         }
         
         if (tipe === 'mutations') {
             const kekur = getSaldoDompet(dataTarget.to) - dataTarget.amount;
-            if (kekur < 0) return showPopup('alert', `Batal: Uang tujuan terlanjur dipakai, kurang ${Utils.formatRp(Math.abs(kekur))}!`, '#ffffff');
+            // WARNA POPUP DIPERBAIKI: Hapus Mutasi jadi Merah jika saldo kurang
+            if (kekur < 0) return showPopup('alert', `Batal: Uang tujuan terlanjur dipakai, kurang ${Utils.formatRp(Math.abs(kekur))}!`, 'var(--danger)');
         }
 
         const butuhPin = (dataTarget.wallet === 'Dana Darurat 🔒' || dataTarget.from === 'Dana Darurat 🔒' || dataTarget.to === 'Dana Darurat 🔒');
         
-        showPopup('delete', "HAPUS RIWAYAT INI?", '#ffffff', () => {
+        // WARNA POPUP DIPERBAIKI: Confirm Hapus jadi Merah Danger
+        showPopup('delete', "HAPUS RIWAYAT INI?", 'var(--danger)', () => {
             const proceedDelete = () => {
                 AppState.db[tipe] = AppState.db[tipe].filter(x => x.id !== idItem);
                 simpanDatabase(); updateRekap(); updatePlotList(); updateWalletDropdownBalances();
@@ -1941,9 +1964,13 @@
         const target = Math.abs(Number(rawAmount.replace(/[^\d]/g, '')));
         
         if (AppState.db.plots.some(p => p.name.toLowerCase() === nama.toLowerCase())) {
-            return showPopup('alert', "Nama Plot sudah digunakan!", '#ffffff');
+            // WARNA POPUP DIPERBAIKI: Alert Error Plot -> Biru
+            return showPopup('alert', "Nama Plot sudah digunakan!", 'var(--wa-blue)');
         }
-        if (!nama || rawAmount === '' || isNaN(target) || target <= 0) return showPopup('alert', "Isi Nama & Target dengan benar!", '#ffffff');
+        if (!nama || rawAmount === '' || isNaN(target) || target <= 0) {
+            // WARNA POPUP DIPERBAIKI: Alert Error Plot -> Biru
+            return showPopup('alert', "Isi Nama & Target dengan benar!", 'var(--wa-blue)');
+        }
         
         AppState.db.plots.push({ id: Utils.buatId(), name: nama, target: target });
         simpanDatabase(); document.getElementById('plot-name').value = ''; document.getElementById('plot-amount').value = '';
@@ -1957,16 +1984,21 @@
 
     function editPlot(idPlot, jenis) {
         const plot = AppState.db.plots.find(x => x.id === idPlot), isAngka = jenis === 'target';
-        showPopup('edit', `Ubah ${isAngka ? 'Total' : 'Nama'} Plot:`, '#ffffff', val => {
+        // WARNA POPUP DIPERBAIKI: Modal Edit Plot -> Biru
+        showPopup('edit', `Ubah ${isAngka ? 'Total' : 'Nama'} Plot:`, 'var(--wa-blue)', val => {
             if (!val) return;
             if (isAngka) {
                 const newTarget = Math.abs(Number(val.replace(/[^\d]/g, '')));
-                if (val.trim() === '' || isNaN(newTarget) || newTarget <= 0) return showPopup('alert', 'Target tidak valid!', '#ffffff');
+                if (val.trim() === '' || isNaN(newTarget) || newTarget <= 0) {
+                    // WARNA POPUP DIPERBAIKI: Alert Error Plot -> Biru
+                    return showPopup('alert', 'Target tidak valid!', 'var(--wa-blue)');
+                }
                 plot[jenis] = newTarget;
             } else { 
                 const cekNama = Utils.toTitleCase(val.trim());
                 if (AppState.db.plots.some(p => p.id !== idPlot && p.name.toLowerCase() === cekNama.toLowerCase())) {
-                    return showPopup('alert', 'Nama Plot sudah digunakan!', '#ffffff');
+                    // WARNA POPUP DIPERBAIKI: Alert Error Plot -> Biru
+                    return showPopup('alert', 'Nama Plot sudah digunakan!', 'var(--wa-blue)');
                 }
                 plot[jenis] = cekNama; 
             }
@@ -1979,7 +2011,8 @@
     }
 
     function deletePlot(idPlot) {
-        showPopup('delete', "Hapus plot ini?\nRiwayat lama akan menjadi 'Tanpa Plot'.", '#ffffff', () => {
+        // WARNA POPUP DIPERBAIKI: Confirm Hapus Plot -> Merah Danger
+        showPopup('delete', "Hapus plot ini?\nRiwayat lama akan menjadi 'Tanpa Plot'.", 'var(--danger)', () => {
             AppState.db.plots = AppState.db.plots.filter(p => p.id !== idPlot);
             
             AppState.db.expense.forEach(e => {
@@ -1997,10 +2030,9 @@
             
             buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot');
             buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val');
-            showToast("Plot dihapus!", 'var(--wa-blue)');
+            showToast("Plot dihapus!", 'var(--danger)');
         });
     }
-
     // =========================================================
     // 9. RENDER ENGINE & GRAFIK 
     // =========================================================
@@ -2075,13 +2107,24 @@
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             if(document.getElementById('rekap').classList.contains('hidden')) return;
+            limitRekapIn = 15;
+            limitRekapOut = 15;
             updateRekap();
         }, 300);
     }
 
     function clearSearch() { 
         document.getElementById('rekap-search').value = ''; 
+        limitRekapIn = 15;
+        limitRekapOut = 15;
         updateRekap(); 
+    }
+
+    // FUNGSI LOAD MORE REKAP
+    function loadMoreRekap(tipe) {
+        if (tipe === 'in') limitRekapIn += 15;
+        else limitRekapOut += 15;
+        updateRekap();
     }
 
     function updateRekap() {
@@ -2138,22 +2181,16 @@
         gabungan.sort((a, b) => {
             const dateA = a.date || '2000-01-01';
             const dateB = b.date || '2000-01-01';
-            
             if (dateA > dateB) return -1;
             if (dateA < dateB) return 1;
-            
             const idA = String(a.id || '');
             const idB = String(b.id || '');
-            
             const timeA = parseInt(idA.split('_')[1] || '0', 36);
             const timeB = parseInt(idB.split('_')[1] || '0', 36);
-            
             if (timeA > timeB) return -1;
             if (timeA < timeB) return 1;
-            
             const countA = parseInt(idA.split('_')[3] || '0', 10);
             const countB = parseInt(idB.split('_')[3] || '0', 10);
-            
             return countB - countA;
         });
         
@@ -2162,13 +2199,24 @@
         let hitungMasukBulanIni = 0;
         let hitungKeluarBulanIni = 0;
         
-        gabungan.forEach(item => {
-            const isIn = item.type === 'income', isMut = item.type === 'mutations';
-            
-            if (isIn) { hitungMasukBulanIni += item.amount; }
-            else if (item.type === 'expense') { hitungKeluarBulanIni += item.amount; visibleExp.push(item); }
+        let dataMasukArr = [];
+        let dataKeluarArr = [];
 
-            const barisHTML = `<li><div class="editable" onclick="editData('${item.type}','${item.id}')"><div class="history-desc-text">
+        gabungan.forEach(item => {
+            const isIn = item.type === 'income';
+            if (isIn) { hitungMasukBulanIni += item.amount; dataMasukArr.push(item); }
+            else { 
+                if(item.type === 'expense') { hitungKeluarBulanIni += item.amount; visibleExp.push(item); }
+                dataKeluarArr.push(item); 
+            }
+        });
+        
+        // Menerapkan Limit Anti-Lag
+        const dataMasukTampil = dataMasukArr.slice(0, limitRekapIn);
+        const dataKeluarTampil = dataKeluarArr.slice(0, limitRekapOut);
+
+        const renderBaris = (item, isMut, isIn) => {
+            return `<li><div class="editable" onclick="editData('${item.type}','${item.id}')"><div class="history-desc-text">
                 <small style="color:var(--text-muted)">${Utils.formatTglTampil(item.date)}</small><br>${Utils.amanHTML(item.desc)}</div>
                 <div style="font-size:11px; font-weight:700;" class="${isMut ? 'mutasi-text' : (isIn ? 'income-text' : 'expense-text')}">
                 ${isMut ? '⇄' : (isIn ? '+' : '-')} ${Utils.formatRp(item.amount)} <br><small style="color:var(--text-muted); font-weight:500; font-size: 9px;">(${item.walletInfo})</small></div></div>
@@ -2178,15 +2226,28 @@
                         <path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path>
                     </svg>
                 </div></li>`;
-            
-            if (isIn) { htmlMasuk += barisHTML; } else { htmlKeluar += barisHTML; } 
-        });
+        };
+
+        dataMasukTampil.forEach(item => htmlMasuk += renderBaris(item, false, true));
+        dataKeluarTampil.forEach(item => htmlKeluar += renderBaris(item, item.type === 'mutations', false));
         
         const emptyState = '<li style="justify-content:center; color:var(--border-color); font-size:11px; border: none; padding-top: 30px;"><div style="text-align:center;"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>- Kosong -</div></li>';
         
         elMasuk.innerHTML = htmlMasuk || emptyState;
         elKeluar.innerHTML = htmlKeluar || emptyState;
         
+        // Logika Tombol Muat Lebih Banyak (Load More)
+        const containerIn = document.getElementById('load-more-in-container');
+        const containerOut = document.getElementById('load-more-out-container');
+        
+        if (dataMasukArr.length > limitRekapIn) {
+            containerIn.innerHTML = `<button class="extra-btn" style="background:transparent; border:1px dashed var(--wa-green); color:var(--wa-green); width:100%; margin-top:10px; padding:10px;" onclick="loadMoreRekap('in')">⬇️ MUAT LEBIH BANYAK (${dataMasukArr.length - limitRekapIn})</button>`;
+        } else { containerIn.innerHTML = ''; }
+
+        if (dataKeluarArr.length > limitRekapOut) {
+            containerOut.innerHTML = `<button class="extra-btn" style="background:transparent; border:1px dashed var(--danger); color:var(--danger); width:100%; margin-top:10px; padding:10px;" onclick="loadMoreRekap('out')">⬇️ MUAT LEBIH BANYAK (${dataKeluarArr.length - limitRekapOut})</button>`;
+        } else { containerOut.innerHTML = ''; }
+
         if(!kunciRaw) { elMasuk.scrollTop = scrollIn; elKeluar.scrollTop = scrollOut; }
 
         const sTunai = getSaldoDompet('Tunai');
@@ -2229,7 +2290,6 @@
 
         AppState.prevBalances = { total: sTotal, in: hitungMasukBulanIni, out: hitungKeluarBulanIni, tunai: sTunai, bank: sBank, ewal: sEwal, darurat1: sDarurat1, darurat2: sDarurat2 };
 
-        // PERBAIKAN BUG PERFORMA: Hilangkan perulangan forEach perhitungan global yang bikin lemot
         AppState.grafikSaatIni = { 
             tunai: sTunai, bank: sBank, ewal: sEwal, darurat1: sDarurat1, darurat2: sDarurat2,
             visibleExpenses: visibleExp
@@ -2340,8 +2400,21 @@
     }
 
     // =========================================================
-    // 10. EXCEL IMPORT / EXPORT 
+    // 10. EXCEL IMPORT / EXPORT (DENGAN PENERJEMAH ARRAY & TANGGAL)
     // =========================================================
+    
+    // Fungsi Penerjemah Array Ekstra sebelum Export
+    const prepExtraForExcel = (dataArray) => {
+        if(!dataArray) return [];
+        return dataArray.map(item => {
+            let newItem = {...item};
+            if (newItem.paymentIds && Array.isArray(newItem.paymentIds)) {
+                newItem.paymentIds = JSON.stringify(newItem.paymentIds);
+            }
+            return newItem;
+        });
+    };
+
     function exportToExcel() {
         document.getElementById('dropdown-menu').classList.add('hidden');
         const kebabSvg = document.querySelector('#kebab-btn svg');
@@ -2362,7 +2435,8 @@
             return a.ID.localeCompare(b.ID);
         });
         
-        if (!gabungan.length) return showPopup('alert', "Belum ada catatan!", '#ffffff');
+        // WARNA POPUP DIPERBAIKI: Alert Excel Kosong -> Hijau Excel
+        if (!gabungan.length) return showPopup('alert', "Belum ada catatan!", 'var(--excel)');
         const wsTrans = XLSX.utils.json_to_sheet(gabungan), wb = XLSX.utils.book_new(); 
         XLSX.utils.book_append_sheet(wb, wsTrans, "RekapKeuangan");
         
@@ -2373,19 +2447,19 @@
         }
 
         if(AppState.db.titipan && AppState.db.titipan.length > 0) { 
-            const wsTitipan = XLSX.utils.json_to_sheet(AppState.db.titipan); XLSX.utils.book_append_sheet(wb, wsTitipan, "Daftar_Titipan"); 
+            const wsTitipan = XLSX.utils.json_to_sheet(prepExtraForExcel(AppState.db.titipan)); XLSX.utils.book_append_sheet(wb, wsTitipan, "Daftar_Titipan"); 
         }
         if(AppState.db.hutang && AppState.db.hutang.length > 0) { 
-            const wsHutang = XLSX.utils.json_to_sheet(AppState.db.hutang); XLSX.utils.book_append_sheet(wb, wsHutang, "Daftar_Hutang"); 
+            const wsHutang = XLSX.utils.json_to_sheet(prepExtraForExcel(AppState.db.hutang)); XLSX.utils.book_append_sheet(wb, wsHutang, "Daftar_Hutang"); 
         }
         if(AppState.db.piutang && AppState.db.piutang.length > 0) { 
-            const wsPiutang = XLSX.utils.json_to_sheet(AppState.db.piutang); XLSX.utils.book_append_sheet(wb, wsPiutang, "Daftar_Piutang"); 
+            const wsPiutang = XLSX.utils.json_to_sheet(prepExtraForExcel(AppState.db.piutang)); XLSX.utils.book_append_sheet(wb, wsPiutang, "Daftar_Piutang"); 
         }
         if(AppState.db.spaylater && AppState.db.spaylater.length > 0) { 
-            const wsSpay = XLSX.utils.json_to_sheet(AppState.db.spaylater); XLSX.utils.book_append_sheet(wb, wsSpay, "Daftar_SPayLater"); 
+            const wsSpay = XLSX.utils.json_to_sheet(prepExtraForExcel(AppState.db.spaylater)); XLSX.utils.book_append_sheet(wb, wsSpay, "Daftar_SPayLater"); 
         }
         if(AppState.db.spinjam && AppState.db.spinjam.length > 0) { 
-            const wsSpin = XLSX.utils.json_to_sheet(AppState.db.spinjam); XLSX.utils.book_append_sheet(wb, wsSpin, "Daftar_SPinjam"); 
+            const wsSpin = XLSX.utils.json_to_sheet(prepExtraForExcel(AppState.db.spinjam)); XLSX.utils.book_append_sheet(wb, wsSpin, "Daftar_SPinjam"); 
         }
 
         XLSX.writeFile(wb, `uang_famBARLA_Backup_${Utils.tglHariIni()}.xlsx`);
@@ -2444,9 +2518,34 @@
                 AppState.tempImportSpinjam = wb.SheetNames.includes("Daftar_SPinjam") ? XLSX.utils.sheet_to_json(wb.Sheets["Daftar_SPinjam"]) : [];
                 document.getElementById('import-modal').classList.remove('hidden');
                 document.body.classList.add('modal-open');
-            } catch (err) { showPopup('alert', "Format File tidak dikenali.", '#ffffff'); } finally { e.target.value = ''; }
+            } catch (err) { 
+                // WARNA POPUP DIPERBAIKI: Alert Excel Error -> Hijau Excel
+                showPopup('alert', "Format File tidak dikenali.", 'var(--excel)'); 
+            } finally { e.target.value = ''; }
         }; reader.readAsArrayBuffer(file);
     }
+
+    // Fungsi Penerjemah Data Ekstra setelah Import Excel
+    const processExtraFromExcel = (dataArray) => {
+        if(!dataArray) return [];
+        return dataArray.map(item => {
+            let newItem = {...item};
+            try {
+                newItem.paymentIds = item.paymentIds ? JSON.parse(item.paymentIds) : [];
+            } catch(e) {
+                newItem.paymentIds = [];
+            }
+            if (newItem.dateIn) newItem.dateIn = parseExcelDate(newItem.dateIn) || String(newItem.dateIn);
+            if (newItem.dateOut) newItem.dateOut = parseExcelDate(newItem.dateOut) || String(newItem.dateOut);
+            if (newItem.dueDate) newItem.dueDate = parseExcelDate(newItem.dueDate) || String(newItem.dueDate);
+            
+            newItem.amount = Number(newItem.amount) || 0;
+            newItem.paidAmount = Number(newItem.paidAmount) || 0;
+            if (newItem.principal !== undefined) newItem.principal = Number(newItem.principal) || 0;
+
+            return newItem;
+        });
+    };
 
     function executeImport(mode) {
         document.getElementById('import-modal').classList.add('hidden'); 
@@ -2461,11 +2560,11 @@
         }
 
         if (mode === 'semua') {
-            if(AppState.tempImportTitipan && AppState.tempImportTitipan.length > 0) AppState.db.titipan = AppState.tempImportTitipan;
-            if(AppState.tempImportHutang && AppState.tempImportHutang.length > 0) AppState.db.hutang = AppState.tempImportHutang;
-            if(AppState.tempImportPiutang && AppState.tempImportPiutang.length > 0) AppState.db.piutang = AppState.tempImportPiutang;
-            if(AppState.tempImportSpaylater && AppState.tempImportSpaylater.length > 0) AppState.db.spaylater = AppState.tempImportSpaylater;
-            if(AppState.tempImportSpinjam && AppState.tempImportSpinjam.length > 0) AppState.db.spinjam = AppState.tempImportSpinjam;
+            if(AppState.tempImportTitipan && AppState.tempImportTitipan.length > 0) AppState.db.titipan = processExtraFromExcel(AppState.tempImportTitipan);
+            if(AppState.tempImportHutang && AppState.tempImportHutang.length > 0) AppState.db.hutang = processExtraFromExcel(AppState.tempImportHutang);
+            if(AppState.tempImportPiutang && AppState.tempImportPiutang.length > 0) AppState.db.piutang = processExtraFromExcel(AppState.tempImportPiutang);
+            if(AppState.tempImportSpaylater && AppState.tempImportSpaylater.length > 0) AppState.db.spaylater = processExtraFromExcel(AppState.tempImportSpaylater);
+            if(AppState.tempImportSpinjam && AppState.tempImportSpinjam.length > 0) AppState.db.spinjam = processExtraFromExcel(AppState.tempImportSpinjam);
 
             AppState.tempImport.forEach(r => {
                 const d = parseExcelDate(r.Tanggal);
@@ -2564,6 +2663,7 @@
             showToast("Semua data telah dihapus.", 'var(--danger)'); 
         });
     }
+
     // =========================================================
     // 11. DATE PICKER KALENDER 
     // =========================================================
@@ -2751,7 +2851,7 @@
     }
 
     // =========================================================
-    // 12. FITUR EKSTRA (GROUPING & CICILAN)
+    // 12. FITUR EKSTRA (GROUPING, CICILAN, & NOTIFIKASI)
     // =========================================================
     const DB_EKSTRA = {
         titipan: { nama: 'Titipan', warna: 'var(--wa-blue)', msk: 'income', klr: 'expense', idTrx: 'incomeId', lblWallet: 'Masuk ke Dompet', teksSelesai: 'Uang dikembalikan kepada:', descMsk: 'Titipan dari ', descKlr: 'Kembalikan Titipan ', btn: 'KEMBALIKAN' },
@@ -2771,7 +2871,10 @@
         document.getElementById('extra-dropdown').classList.toggle('hidden');
     }
 
-    function renderDaftarExtra() {
+    function renderDaftarExtra(tambahLimit = false) {
+        if (!tambahLimit) limitLunasEkstra = 5; 
+        else limitLunasEkstra += 15; 
+
         const cfg = DB_EKSTRA[ModeEkstraAktif];
         const ul = document.getElementById('list-extra');
         if (!AppState.db[ModeEkstraAktif]) AppState.db[ModeEkstraAktif] = [];
@@ -2795,6 +2898,8 @@
                 totalAktifAll += sisa;
             }
         });
+
+        selesaiItems.reverse();
 
         const isShopee = ModeEkstraAktif === 'spaylater' || ModeEkstraAktif === 'spinjam';
         document.getElementById('extra-modal-title').innerText = isShopee ? `TAGIHAN AKTIF: ${Utils.formatRp(totalAktifAll)}` : `Daftar ${cfg.nama} (Total: ${Utils.formatRp(totalAktifAll)})`;
@@ -2830,11 +2935,17 @@
                     ? '' 
                     : `<div class="cicil-progress"><span>(Dicicil: ${Utils.formatRp(t.paidAmount)} / ${Utils.formatRp(t.amount)})</span></div>`;
 
+                let jatuhTempoHtml = '';
+                if (t.dueDate && t.status !== 'selesai') {
+                    jatuhTempoHtml = `<div style="font-size: 9px; color: var(--danger); font-weight: 600; margin-top: 4px;">Jatuh Tempo: ${Utils.formatTglTampil(t.dueDate)}</div>`;
+                }
+
                 html += `
                 <li class="titipan-item">
                     <div class="titipan-header">
                         <div class="titipan-name">
                             <span style="color:var(--text-light);">${Utils.amanHTML(t.catatan || t.nama)}</span>
+                            ${jatuhTempoHtml}
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span class="titipan-amount" style="font-size:13px; font-weight:700; color:${cfg.warna};">${Utils.formatRp(sisa)}</span>
@@ -2854,13 +2965,15 @@
 
         if (selesaiItems.length > 0) {
             html += `<div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-top:20px; border-bottom:1px solid var(--border-color); padding-bottom:5px; margin-bottom:10px;">Riwayat Lunas:</div>`;
-            selesaiItems.forEach(t => {
+            const lunasDitampilkan = selesaiItems.slice(0, limitLunasEkstra);
+            
+            lunasDitampilkan.forEach(t => {
                 html += `
                 <li class="titipan-item" style="opacity: 0.6;">
                     <div class="titipan-header">
                         <div class="titipan-name">
                             <span class="coretan-nyata">${Utils.amanHTML(t.nama)} ${t.catatan ? '- '+Utils.amanHTML(t.catatan) : ''}</span>
-                            <span class="titipan-time" style="color:#888; font-size:10px; font-weight:600; margin-top:2px;">${t.dateOut}</span>
+                            <span class="titipan-time" style="color:#888; font-size:10px; font-weight:600; margin-top:2px;">${t.dateOut || 'Lunas'}</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span class="titipan-amount coretan-nyata" style="font-size:13px; font-weight:700;">${Utils.formatRp(t.amount)}</span>
@@ -2874,8 +2987,12 @@
                     </div>
                 </li>`;
             });
+
+            if (selesaiItems.length > limitLunasEkstra) {
+                const sisaData = selesaiItems.length - limitLunasEkstra;
+                html += `<button class="btn-main" style="background-color: transparent !important; color: ${cfg.warna} !important; border: 1px dashed ${cfg.warna} !important; margin-top: 15px; width: 100%;" onclick="renderDaftarExtra(true)">⬇️ MUAT LEBIH BANYAK (${sisaData} TERSISA)</button>`;
+            }
         }
-        
         ul.innerHTML = html;
     }
 
@@ -2908,6 +3025,16 @@
         document.getElementById('extra-nominal').value = '';
         document.getElementById('extra-principal').value = '';
         document.getElementById('extra-id-edit').value = '';
+        
+        if (ModeEkstraAktif === 'hutang' || ModeEkstraAktif === 'spinjam') {
+            document.getElementById('extra-duedate-group').classList.remove('hidden');
+            const hrIni = Utils.tglHariIni();
+            document.getElementById('extra-duedate').dataset.rawDate = hrIni;
+            document.getElementById('extra-duedate').value = Utils.formatTglTampil(hrIni);
+            document.getElementById('extra-duedate').setAttribute('onclick', `openPicker('extra-duedate', 'date', '${cfg.warna}')`);
+        } else {
+            document.getElementById('extra-duedate-group').classList.add('hidden');
+        }
         
         if (ModeEkstraAktif === 'spaylater') {
             document.getElementById('extra-nama').placeholder = "Misal: Dona";
@@ -2960,6 +3087,16 @@
                 document.getElementById('extra-nama').value = data.nama;
                 document.getElementById('extra-catatan').value = data.catatan || '';
                 document.getElementById('extra-nominal').value = data.amount.toLocaleString('id-ID');
+                
+                if (ModeEkstraAktif === 'spinjam') {
+                    document.getElementById('extra-principal-group').classList.remove('hidden');
+                    document.getElementById('extra-principal').value = data.principal ? data.principal.toLocaleString('id-ID') : '';
+                }
+
+                if (data.dueDate) {
+                    document.getElementById('extra-duedate').dataset.rawDate = data.dueDate;
+                    document.getElementById('extra-duedate').value = Utils.formatTglTampil(data.dueDate);
+                }
             }
         }
         document.getElementById('extra-form-modal').classList.remove('hidden');
@@ -2978,6 +3115,8 @@
         const principal = Math.abs(Number(rawPrincipal.replace(/[^\d]/g, '')));
         
         const tglHariIni = Utils.tglHariIni();
+        
+        const dueDate = document.getElementById('extra-duedate-group').classList.contains('hidden') ? null : (document.getElementById('extra-duedate').dataset.rawDate || tglHariIni);
 
         if (!nama || rawAmount === '' || isNaN(amount) || amount <= 0) {
             return showPopup('alert', 'Isi Nama dan Nominal Tagihan dengan benar!', cfg.warna);
@@ -3002,9 +3141,14 @@
             if (cfg.msk === 'none') { 
                 if (idEdit) {
                     const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === idEdit);
-                    if(dataExt) { dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount; }
+                    if(dataExt) { 
+                        if (amount < (dataExt.paidAmount || 0)) {
+                            return showPopup('alert', `Batal: Tagihan baru tidak boleh lebih kecil dari yang sudah dibayar (${Utils.formatRp(dataExt.paidAmount)})!`, 'var(--danger)');
+                        }
+                        dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount; if(dueDate) dataExt.dueDate = dueDate; 
+                    }
                 } else {
-                    let entryBaru = { id: Utils.buatId(), nama: nama, catatan: catatan, amount: amount, paidAmount: 0, paymentIds: [], dateIn: tglHariIni, status: 'aktif' };
+                    let entryBaru = { id: Utils.buatId(), nama: nama, catatan: catatan, amount: amount, paidAmount: 0, paymentIds: [], dateIn: tglHariIni, status: 'aktif', dueDate: dueDate };
                     AppState.db[ModeEkstraAktif].push(entryBaru);
                 }
             } else { 
@@ -3015,10 +3159,10 @@
                         const dompetLama = trxData ? trxData.wallet : 'Tunai';
                         
                         if (trxData && ModeEkstraAktif !== 'spinjam') {
-                             // PERBAIKAN BUG KRITIS: Hitung selisih sebelum nilai ditimpa
+                             if (amount < (dataExt.paidAmount || 0)) {
+                                 return showPopup('alert', `Batal: Tagihan baru tidak boleh lebih kecil dari yang sudah dibayar (${Utils.formatRp(dataExt.paidAmount)})!`, 'var(--danger)');
+                             }
                              const selisih = dataExt.amount - amount;
-                             
-                             dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount;
                              
                              if (cfg.msk === 'income' && selisih > 0 && getSaldoDompet(dompetLama) < selisih) {
                                  return showPopup('alert', `Batal: Saldo [${dompetLama}] sudah terpakai sebagian!`, 'var(--danger)');
@@ -3026,10 +3170,19 @@
                              if (cfg.msk === 'expense' && selisih < 0 && getSaldoDompet(dompetLama) < Math.abs(selisih)) {
                                  return showPopup('alert', `Batal: Saldo [${dompetLama}] tidak cukup untuk menambah tagihan!`, 'var(--danger)');
                              }
+
+                             dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount; if(dueDate) dataExt.dueDate = dueDate;
                              trxData.desc = fullDesc; trxData.amount = amount;
                         } else if (trxData && ModeEkstraAktif === 'spinjam') {
-                             dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount;
-                             trxData.desc = fullDesc;
+                             if (amount < (dataExt.paidAmount || 0)) {
+                                 return showPopup('alert', `Batal: Tagihan baru tidak boleh lebih kecil dari yang sudah dibayar (${Utils.formatRp(dataExt.paidAmount)})!`, 'var(--danger)');
+                             }
+                             const selisihPrincipal = dataExt.principal - principal;
+                             if (selisihPrincipal > 0 && getSaldoDompet(dompetLama) < selisihPrincipal) {
+                                 return showPopup('alert', `Batal: Saldo ${dompetLama} sudah terpakai dan tidak cukup untuk mengurangi tagihan Uang Cair!`, 'var(--danger)');
+                             }
+                             dataExt.nama = nama; dataExt.catatan = catatan; dataExt.amount = amount; dataExt.principal = principal; if(dueDate) dataExt.dueDate = dueDate;
+                             trxData.desc = fullDesc; trxData.amount = principal;
                         }
                     }
                 } else {
@@ -3041,12 +3194,12 @@
                     const idBaru = Utils.buatId(), idTrx = Utils.buatId();
                     AppState.db[cfg.msk].push({ id: idTrx, date: tglHariIni, desc: fullDesc, amount: uangMasukKeluar, wallet: dompetAktual, plotId: "" });
 
-                    let entryBaru = { id: idBaru, nama: nama, catatan: catatan, amount: amount, principal: uangMasukKeluar, paidAmount: 0, paymentIds: [], dateIn: tglHariIni, status: 'aktif' };
+                    let entryBaru = { id: idBaru, nama: nama, catatan: catatan, amount: amount, principal: uangMasukKeluar, paidAmount: 0, paymentIds: [], dateIn: tglHariIni, status: 'aktif', dueDate: dueDate };
                     entryBaru[cfg.idTrx] = idTrx;
                     AppState.db[ModeEkstraAktif].push(entryBaru);
                 }
             }
-            simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+            simpanDatabase(); updateRekap(true); updateWalletDropdownBalances();
             document.getElementById('extra-form-modal').classList.add('hidden');
             renderDaftarExtra();
             showToast("Catatan tersimpan!", cfg.warna);
@@ -3138,7 +3291,7 @@
                 dataExt.dateOut = `Lunas pada: ${tglStr}`;
             }
 
-            simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+            simpanDatabase(); updateRekap(true); updateWalletDropdownBalances();
             document.getElementById('extra-cicil-modal').classList.add('hidden');
             renderDaftarExtra();
             showToast(`Cicilan ${Utils.formatRp(bayar)} Berhasil!`, cfg.warna);
@@ -3196,7 +3349,7 @@
         
         if (!dataExt || !paymentData) return;
 
-        showPopup('delete', "Batalkan dan hapus riwayat cicilan ini?\n(Saldo akan dikembalikan)", '#ffffff', () => {
+        showPopup('delete', "Batalkan dan hapus riwayat cicilan ini?\n(Saldo akan dikembalikan)", 'var(--danger)', () => {
             if (cfg.klr === 'income') {
                 if (getSaldoDompet(paymentData.wallet) < paymentData.amount) {
                     return showPopup('alert', `Batal: Saldo dompet [${paymentData.wallet}] sudah terpakai! Jika cicilan dihapus, saldo Anda minus.`, 'var(--danger)');
@@ -3212,7 +3365,7 @@
                 dataExt.dateOut = null;
             }
 
-            simpanDatabase(); updateRekap(); updateWalletDropdownBalances();
+            simpanDatabase(); updateRekap(true); updateWalletDropdownBalances();
             document.getElementById('riwayat-cicilan-modal').classList.add('hidden');
             renderDaftarExtra();
             showToast("Cicilan berhasil dibatalkan!", 'var(--danger)');
@@ -3224,9 +3377,8 @@
         const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === id);
         if(!dataExt) return;
 
-        showPopup('delete', `Hapus riwayat ${cfg.nama} ini?\n(Transaksi pemasukan/pengeluarannya dan semua cicilannya di Rekap juga akan ikut dihapus agar Saldo kembali netral)`, '#ffffff', () => {
+        showPopup('delete', `Hapus riwayat ${cfg.nama} ini?\n(Transaksi pemasukan/pengeluarannya dan semua cicilannya di Rekap juga akan ikut dihapus agar Saldo kembali netral)`, 'var(--danger)', () => {
             
-            // PERBAIKAN BUG KRITIS: Paradoks Hapus Ekstra menggunakan Simulasi Netralisasi Saldo
             let simulatedBalances = { 
                 'Tunai': getSaldoDompet('Tunai'), 'Bank': getSaldoDompet('Bank'), 
                 'e-Wallet': getSaldoDompet('e-Wallet'), 'Dana Darurat': getSaldoDompet('Dana Darurat'), 
@@ -3266,9 +3418,38 @@
 
             AppState.db[ModeEkstraAktif] = AppState.db[ModeEkstraAktif].filter(x => x.id !== id);
             
-            simpanDatabase(); updateRekap(); updateWalletDropdownBalances(); renderDaftarExtra();
+            simpanDatabase(); updateRekap(true); updateWalletDropdownBalances(); renderDaftarExtra();
             showToast("Riwayat bersih dihapus!", 'var(--danger)');
         });
+    }
+
+    function cekNotifikasiJatuhTempo() {
+        const hariIni = new Date();
+        hariIni.setHours(0, 0, 0, 0); 
+        let pesanPeringatan = "";
+        
+        const tagihanAktif = [...(AppState.db.spinjam || []), ...(AppState.db.hutang || [])];
+        
+        tagihanAktif.forEach(item => {
+            if (item.status === 'aktif' && item.dueDate) {
+                const parts = item.dueDate.split('-');
+                const tglJatuhTempo = new Date(parts[0], parts[1] - 1, parts[2]);
+                const selisihHari = Math.ceil((tglJatuhTempo - hariIni) / (1000 * 60 * 60 * 24));
+                const sisaTagihan = item.amount - (item.paidAmount || 0);
+                
+                if (selisihHari <= 3 && selisihHari >= 0) {
+                    pesanPeringatan += `⚠️ "${item.nama}" jatuh tempo dalam ${selisihHari} hari! (Sisa: ${Utils.formatRp(sisaTagihan)})\n\n`;
+                } else if (selisihHari < 0) {
+                    pesanPeringatan += `🚨 "${item.nama}" TELAH LEWAT jatuh tempo! (Sisa: ${Utils.formatRp(sisaTagihan)})\n\n`;
+                }
+            }
+        });
+        
+        if (pesanPeringatan !== "") {
+            setTimeout(() => {
+                showPopup('alert', "PENGINGAT JATUH TEMPO:\n\n" + pesanPeringatan, 'var(--danger)');
+            }, 1000);
+        }
     }
 
     window.addEventListener('DOMContentLoaded', () => { 
@@ -3278,6 +3459,7 @@
         updateRekap(); 
         updateWalletDropdownBalances(); 
         jalankanJam(); 
+        cekNotifikasiJatuhTempo(); 
         showPage(null, 'pemasukan', 0);
         terapkanVersi(); 
     });
