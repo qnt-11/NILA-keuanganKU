@@ -1,10 +1,10 @@
 /**
  * SERVICE WORKER uang famBARLA (ENTERPRISE SECURITY & SMART CACHE)
- * Versi 3.0 (EXTREME PRO - PATCHED)
- * Optimasi: Network-First HTML, Safe Cache Limit, & Background Sync Prep
+ * Versi 3.1 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
+ * Optimasi: Network-First HTML, Safe Cache Limit, Strict Anti-Opaque, & Background Sync
  */
 
-const APP_VERSION = '3.0'; 
+const APP_VERSION = '3.1'; 
 const CACHE_PREFIX = 'uang-fambarla-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -21,6 +21,7 @@ const staticAssets = [
 
 let isCleaning = false;
 
+// Mekanisme Pembersihan Cache Dinamis Anti-Bentrok
 const limitCacheSize = (name, size) => {
   if (isCleaning) return Promise.resolve(); 
   isCleaning = true;
@@ -45,9 +46,12 @@ self.addEventListener('install', event => {
     caches.open(CACHE_STATIC).then(cache => {
       return Promise.all(
         staticAssets.map(asset => {
-          return fetch(asset)
+          // Paksa mode CORS untuk CDN agar tidak Opaque (Hemat Memori HP)
+          const reqOpt = asset.startsWith('http') ? { mode: 'cors' } : {};
+          return fetch(asset, reqOpt)
             .then(response => {
-              if (response.ok || response.type === 'opaque') {
+              // Blokir Opaque: Hanya simpan respons yang benar-benar OK
+              if (response.ok && response.type !== 'opaque') {
                 return cache.put(asset, response).catch(() => {}); 
               }
             })
@@ -101,7 +105,7 @@ self.addEventListener('sync', event => {
 
 async function prosesUploadTertunda() {
   try {
-    // Catatan Arsitek: Implementasi baca IndexedDB -> Fetch ke GAS -> Hapus antrean
+    // Ruang untuk implementasi antrean IndexedDB ke Google Apps Script
     console.log('[SW] Proses Background Sync selesai (Placeholder).');
   } catch (error) {
     console.error('[SW] Background Sync gagal, browser akan retry:', error);
@@ -113,14 +117,14 @@ async function prosesUploadTertunda() {
 // INTERCEPTOR JARINGAN & CACHE STRATEGY TERPISAH
 // =========================================================
 self.addEventListener('fetch', event => {
-  let req = event.request;
-  let reqUrl = new URL(req.url);
+  const req = event.request;
+  const reqUrl = new URL(req.url);
 
   if (req.method !== 'GET') return;
   if (!reqUrl.protocol.startsWith('http')) return;
   if (reqUrl.pathname.endsWith('sw.js')) return;
 
-  // Bebaskan Google Script (API) dari Cache
+  // Bebaskan API Google Script dari semua jenis cache
   if (reqUrl.hostname.includes('script.google')) {
     event.respondWith(fetch(req));
     return;
@@ -129,7 +133,7 @@ self.addEventListener('fetch', event => {
   const isHtmlRequest = req.mode === 'navigate' || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   const cacheKey = isHtmlRequest ? './index.html' : req;
 
-  // 1. STRATEGI NETWORK-FIRST UNTUK HTML (Mencegah Zombie App saat Hotfix)
+  // 1. STRATEGI NETWORK-FIRST UNTUK HTML (Mencegah Zombie App)
   if (isHtmlRequest) {
     event.respondWith(
       fetch(req).then(networkResponse => {
@@ -139,7 +143,6 @@ self.addEventListener('fetch', event => {
         }
         return networkResponse;
       }).catch(() => {
-        // Fallback ke Cache jika Offline
         return caches.match(cacheKey).then(cachedRes => cachedRes || caches.match('./'));
       })
     );
@@ -151,18 +154,18 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(req).then(cachedRes => {
         const fetchPromise = fetch(req).then(networkRes => {
-          if (networkRes && networkRes.ok) {
+          if (networkRes && networkRes.ok && networkRes.type !== 'opaque') {
             const clone = networkRes.clone();
             caches.open(CACHE_DYNAMIC).then(cache => {
               cache.put(req, clone).then(() => {
-                limitCacheSize(CACHE_DYNAMIC, 50); // FIX: Eksekusi aman tanpa event.waitUntil yang kadaluarsa
+                event.waitUntil(limitCacheSize(CACHE_DYNAMIC, 50)); 
               }).catch(() => {}); 
             });
           }
           return networkRes;
         }).catch(() => cachedRes);
         
-        if (cachedRes) event.waitUntil(fetchPromise); // Menjaga SW tetap hidup untuk fetchPromise
+        if (cachedRes) event.waitUntil(fetchPromise); 
         return cachedRes || fetchPromise;
       })
     );
@@ -174,7 +177,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(req).then(cachedRes => {
         return cachedRes || fetch(req).then(networkRes => {
-          if (networkRes && networkRes.ok) {
+          if (networkRes && networkRes.ok && networkRes.type !== 'opaque') {
             const clone = networkRes.clone();
             caches.open(CACHE_STATIC).then(cache => {
               cache.put(req, clone).catch(() => {});
@@ -199,7 +202,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
         return cachedResponse || fetch(req).then(networkResponse => {
-          if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
+          if (networkResponse && networkResponse.ok && networkResponse.type !== 'opaque') {
             const clone = networkResponse.clone();
             caches.open(CACHE_STATIC).then(cache => {
               cache.put(cacheKey, clone).catch(() => {});
@@ -218,7 +221,7 @@ self.addEventListener('fetch', event => {
             const clone = networkResponse.clone();
             caches.open(CACHE_DYNAMIC).then(cache => {
               cache.put(req, clone).then(() => {
-                limitCacheSize(CACHE_DYNAMIC, 60); // FIX: Eksekusi aman tanpa event.waitUntil yang kadaluarsa
+                event.waitUntil(limitCacheSize(CACHE_DYNAMIC, 60)); 
               }).catch(() => {});
             });
           }
@@ -226,7 +229,7 @@ self.addEventListener('fetch', event => {
         }).catch(() => Response.error());
 
         if (cachedResponse) {
-          event.waitUntil(fetchPromise); // Menjaga SW tetap hidup untuk fetchPromise
+          event.waitUntil(fetchPromise); 
           return cachedResponse; 
         }
         
