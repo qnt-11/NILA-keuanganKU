@@ -2477,7 +2477,7 @@
             options: { aspectRatio: 1.5, cutout: '70%', plugins: { legend: { display: !portKosong, position: 'right', labels: { color: '#cccccc', font: { size: 10, family: 'Montserrat' }, boxWidth: 12 } }, tooltip: { enabled: !portKosong } }, animation: { animateScale: true, animateRotate: true, duration: 600 } } 
         });
     }
-         // =========================================================
+          // =========================================================
     // 12. EXCEL IMPORT / EXPORT (UNIVERSAL REGEX PARSER)
     // =========================================================
     const prepExtraForExcel = (dataArray) => {
@@ -2819,13 +2819,20 @@
                 let baseName = String(t.nama).trim();
                 let itemName = baseName;
 
-                if (ModeEkstraAktif === 'spaylater') {
-                    const matchKurung = baseName.match(/^(.*?)\s*\(([^)]+)\)$/);
-                    if (matchKurung) {
-                        baseName = matchKurung[1].trim(); 
-                        itemName = matchKurung[2].trim(); 
-                    } else if (t.catatan) {
-                        itemName = baseName + " - " + t.catatan;
+                // REGEX UNIVERSAL: Membelah teks "Nama (Barang/Tagihan)"
+                const matchKurung = baseName.match(/^(.*?)\s*\(([^)]+)\)$/);
+                if (matchKurung) {
+                    baseName = matchKurung[1].trim(); 
+                    itemName = matchKurung[2].trim(); 
+                } else if (t.catatan) {
+                    itemName = baseName + " - " + t.catatan;
+                }
+
+                // SMART PLOT NAME: Khusus Pengingat Tagihan Rutin yang diikat ke Plot
+                if (ModeEkstraAktif === 'pengingat' && t.tipe === 'tagihan' && t.defaultPlotId) {
+                    const plotTerkait = AppState.db.plots.find(p => p.id === t.defaultPlotId);
+                    if (plotTerkait && itemName === baseName) {
+                        itemName = plotTerkait.name;
                     }
                 }
 
@@ -3349,3 +3356,4 @@
 </script>
 </body>
 </html>
+   
