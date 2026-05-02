@@ -157,14 +157,13 @@
         @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
 
         /* =========================================================
-           5. LAYOUT HALAMAN
+           5. LAYOUT HALAMAN & KARTU
         ========================================================= */
         .page { display: flex; flex-direction: column; flex: 1; min-height: 0; max-width: 600px; width: 100%; margin: 0 auto; overflow-x: hidden; }
         .content { flex: 1; overflow: hidden; padding: 15px; display: flex; flex-direction: column; padding-bottom: 0; }
         #pemasukan, #pengeluaran, #plot, #rekap { overflow-y: hidden; overflow-x: hidden; padding-bottom: 10px; } 
         .card { background: var(--wa-card); padding: 20px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
         .card-flex { display: flex; flex-direction: column; flex: 1; min-height: 0; flex-shrink: 1; padding-bottom: 10px; margin-bottom: 0; overflow: hidden; }
-        
         /* =========================================================
            6. FORMULIR & INPUT
         ========================================================= */
@@ -724,7 +723,7 @@
                 <span class="title-barla"><span class="letter" style="animation-delay: 1.4s">B</span><span class="letter" style="animation-delay: 1.6s">A</span><span class="letter" style="animation-delay: 1.8s">R</span><span class="letter" style="animation-delay: 2.0s">L</span><span class="letter" style="animation-delay: 2.2s">A</span></span>
             </h2>
             <div style="margin-top: 8px;">
-                <span id="app-version-display" style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">VERSI 3.1 (PRO)</span>
+                <span id="app-version-display" style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">VERSI 4.0 (PRO)</span>
             </div>
         </div>
         
@@ -861,12 +860,21 @@
             <input type="hidden" id="extra-freq" value="sekali">
         </div>
 
+        <div class="form-group hidden" style="text-align:left; margin-bottom: 10px;" id="extra-plot-group">
+            <label style="color:var(--wa-blue);">Ambil dari Plot (Opsional)</label>
+            <div class="custom-select-container">
+                <div class="custom-select-trigger text-ellipsis" id="extra-plot-trigger" onclick="toggleCustomSelect('extra-plot-opts', event)" style="color:var(--text-muted)">-- Tanpa Plot --</div>
+                <div class="custom-select-options hidden" id="extra-plot-opts"></div>
+            </div>
+            <input type="hidden" id="extra-plot" value="">
+        </div>
+
         <div class="form-group" style="text-align:left;" id="extra-date-group">
             <label id="extra-date-label">Tanggal Transaksi</label>
             <input type="text" id="extra-date" readonly>
         </div>
 
-        <div class="form-group" style="text-align:left;"><label id="extra-nama-label">Nama Peminjam</label><input type="text" id="extra-nama" class="auto-cap" placeholder="Misal: Dona" autocomplete="off"></div>
+        <div class="form-group" style="text-align:left;"><label id="extra-nama-label">Nama Pengingat</label><input type="text" id="extra-nama" class="auto-cap" placeholder="Misal: Dona (SPP Anak)" autocomplete="off"></div>
         
         <div class="form-group" style="text-align:left;">
             <label style="color:#25D366;">Nomor WhatsApp (Opsional)</label>
@@ -981,8 +989,8 @@
     // =========================================================
     // 1. PENGATURAN AWAL & VARIABEL GLOBAL
     // =========================================================
-    const APP_VERSION = "3.1"; 
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwEm4XnmmkOlijgb0SlMfDPP0TzoZ9MRjVWpuF2Fn1WUxct_ST40C20l7SXZCJtTtae/exec";
+    const APP_VERSION = "4.0"; 
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxFe2-sE3c20yqks022AXI-FrzEBpqn1UKuwESki0wCHLvJYf5Mw-Y4YEqAbzx3ziUm/exec";
     
     try {
         if ('serviceWorker' in navigator) {
@@ -1011,10 +1019,34 @@
 
     let isNetworkProcessing = false;
     let isGlobalSubmitting = false; 
-    let isDatabaseKorup = false; // BENDERA SAFE MODE (NEW)
+    let isDatabaseKorup = false;
 
     // =========================================================
-    // 2. FUNGSI PEMBERSIH (CENTRALIZED LOGIC)
+    // 2. GLOBAL ERROR CATCHER (Anti-Deadlock Jaring Pengaman)
+    // =========================================================
+    window.addEventListener('error', function(event) {
+        isGlobalSubmitting = false; 
+        isNetworkProcessing = false;
+        const modalLoader = document.getElementById('modal-loader'), customModal = document.getElementById('custom-modal');
+        if (customModal && !customModal.classList.contains('hidden') && modalLoader && !modalLoader.classList.contains('hidden')) { tutupModalAman('custom-modal'); }
+        if (event.message && (event.message.includes('ResizeObserver') || event.message.includes('Script error'))) return;
+        console.error("famBARLA System Intercepted an Error:", event.error);
+        showToast("Terjadi gangguan sistem sesaat. Antarmuka dipulihkan.", "var(--danger)");
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        isGlobalSubmitting = false;
+        isNetworkProcessing = false;
+        const modalLoader = document.getElementById('modal-loader'), customModal = document.getElementById('custom-modal');
+        if (customModal && !customModal.classList.contains('hidden') && modalLoader && !modalLoader.classList.contains('hidden')) { 
+            tutupModalAman('custom-modal'); 
+        }
+        console.error("famBARLA Deadlock Intercepted (Promise Rejection):", event.reason);
+        showToast("Koneksi asinkron gagal/terputus. Kunci memori dilepaskan.", "var(--danger)");
+    });
+
+    // =========================================================
+    // 3. FUNGSI PEMBERSIH (CENTRALIZED LOGIC)
     // =========================================================
     function tutupSemuaMenuDrop() {
         document.getElementById('dropdown-menu').classList.add('hidden');
@@ -1039,7 +1071,7 @@
     }
 
     // =========================================================
-    // 3. SISTEM DATABASE & CACHE SALDO (REFACTORED: SYNCHRONOUS & PRECISION)
+    // 4. SISTEM DATABASE & CACHE SALDO (SYNCHRONOUS & PRECISION)
     // =========================================================
     function muatDatabase() {
         try {
@@ -1064,9 +1096,8 @@
                 AppState.db.spinjam = parsed.spinjam || []; 
             }
             saldoCache.valid = false;
-            isDatabaseKorup = false; // Database aman
+            isDatabaseKorup = false; 
         } catch (e) {
-            // AKTIFKAN SAFE MODE JIKA JSON RUSAK
             isDatabaseKorup = true; 
             setTimeout(() => {
                 showPopup('alert', "🚨 DATABASE RUSAK!\n\nMemori HP terputus saat menyimpan data sebelumnya. Untuk mencegah data lama tertimpa, FITUR SIMPAN DIKUNCI.\n\nHarap SEGERA lakukan 'Load Cloud' atau 'Load Excel' untuk memulihkan sistem.", 'var(--danger)');
@@ -1075,7 +1106,6 @@
     }
 
     function simpanDatabase() {
-        // PROTEKSI KRITIS: Tolak simpan jika status DB korup
         if (isDatabaseKorup) {
             showToast("Sistem Terkunci! Silakan Load Cloud terlebih dahulu.", "var(--danger)");
             throw new Error("Penyimpanan Dibatalkan: Database Korup");
@@ -1083,18 +1113,14 @@
 
         saldoCache.valid = false; 
 
-        // Eksekusi SYNCHRONOUS untuk menghindari Ghost Balance state mismatch
         try {
             const dataString = JSON.stringify(AppState.db);
-            
-            // OPTIMASI CPU: Menggunakan estimasi string length ketimbang Blob
             const estimasiBytes = dataString.length * 2; 
             const maxBytes = 5 * 1024 * 1024; 
             
             const persenRaw = (estimasiBytes / maxBytes) * 100;
             const persen = Math.min(Math.max(persenRaw, 0), 100); 
             
-            // Proteksi memori penuh sebelum crash
             if (persen > 98) {
                 muatDatabase(); 
                 updateRekap(); 
@@ -1137,7 +1163,6 @@
 
         const amankanNama = (nm) => walletMap[String(nm || '').trim().toLowerCase()] || 'Tunai';
 
-        // Menerapkan Double-Precision integer math untuk membunuh Floating-Point Leak
         for(let i = 0, len = AppState.db.income.length; i < len; i++) {
             const item = AppState.db.income[i];
             const w = amankanNama(item.wallet);
@@ -1165,7 +1190,7 @@
     }
     
     // =========================================================
-    // 4. UTILITAS UMUM & TOAST ANIMASI
+    // 5. UTILITAS UMUM & TOAST ANIMASI
     // =========================================================
     const Utils = {
         buatId: () => 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9) + '_' + (++globalIdCounter),
@@ -1174,14 +1199,13 @@
             return (isNeg ? "-" : "") + "Rp " + Math.abs(Math.round(angka || 0)).toLocaleString('id-ID');
         },
         amanHTML: (teks) => teks ? String(teks).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])) : "-",
-        // TAMBAHAN: Escape spesifik untuk parameter fungsi inline (onclick dll) mencegah DOM-Injection
         amanJS: (teks) => {
             if (!teks) return "";
             return String(teks)
-                .replace(/\\/g, '\\\\')    // Escape backslashes dulu
-                .replace(/'/g, "\\'")      // Escape single quotes
-                .replace(/"/g, '&quot;')   // Ubah double quotes ke entity HTML
-                .replace(/\n/g, '\\n')     // Tangani line break tersembunyi
+                .replace(/\\/g, '\\\\')    
+                .replace(/'/g, "\\'")      
+                .replace(/"/g, '&quot;')   
+                .replace(/\n/g, '\\n')     
                 .replace(/\r/g, '\\r');
         },
         tglHariIni: () => {
@@ -1198,7 +1222,6 @@
         amanCSV: (teks) => {
             if (!teks) return "";
             let teksAman = String(teks).replace(/"/g, '""');
-            // REFACTOR: Deteksi spasi/tab awal sebelum karakter eksekusi (Mencegah CSV Injection)
             if (/^\s*[=\+\-@]/.test(teksAman)) {
                 teksAman = "'" + teksAman; 
             }
@@ -1298,8 +1321,9 @@
             toastTimeoutRemove = setTimeout(() => toast.classList.add('hidden'), 400); 
         }, 3000);
     }
+
     // =========================================================
-    // 5. EVENT LISTENERS GLOBAL 
+    // 6. EVENT LISTENERS GLOBAL 
     // =========================================================
     document.addEventListener('focus', function(e) {
         if (e.target.tagName === 'INPUT' && !e.target.readOnly && e.target.type !== 'hidden' && e.target.type !== 'file') {
@@ -1391,7 +1415,7 @@
     });
 
     // =========================================================
-    // 6. MANAJEMEN POPUP, MODAL & PIN
+    // 7. MANAJEMEN POPUP, MODAL & PIN
     // =========================================================
     function showPopup(mode, pesan, warnaTema = '#ffffff', callback = null, nilaiAwal = null, isAngka = false) {
         const overlay = document.getElementById('custom-modal');
@@ -1490,7 +1514,6 @@
         }
     }
 
-    // REFACTOR: Resolusi Deadlock UI - Mengaitkan pelepasan lock langsung ke tombol Batal
     function verifyPin(callback, onCancelOrFail) {
         showPopup('pin', 'Masukkan PIN Keamanan 🔒:', 'var(--danger)', (val) => {
             if (val === '170823') {
@@ -1501,12 +1524,11 @@
             }
         });
 
-        // Injeksi pengaman memori (Deadlock Breaker)
         const btnBatal = document.getElementById('modal-btn-cancel');
         const originalClick = btnBatal.onclick;
         btnBatal.onclick = () => {
-            if (originalClick) originalClick(); // Tetap jalankan closeFunc() bawaan
-            if (onCancelOrFail) onCancelOrFail(); // Lepas gembok isGlobalSubmitting
+            if (originalClick) originalClick(); 
+            if (onCancelOrFail) onCancelOrFail(); 
         };
     }
 
@@ -1519,9 +1541,8 @@
     function closeAboutModal() { 
         tutupModalAman('about-modal');
     }
-
     // =========================================================
-    // 7. CLOUD BACKUP & LOAD (REFACTORED SMART SYNC)
+    // 8. CLOUD BACKUP & LOAD (REFACTORED SMART SYNC)
     // =========================================================
     function backupToCloud() {
         tutupSemuaMenuDrop();
@@ -1599,20 +1620,16 @@
         tutupModalAman('cloud-load-modal');
     }
 
-    // REFACTOR: Smart Safety Net untuk Single Device
     function promptExecuteLoadCloud() {
         const selectedMonth = document.getElementById('cloud-month-val').value;
         if(!selectedMonth) return;
         
         closeCloudLoadModal();
         
-        // Deteksi apakah bulan yang dipilih adalah bulan yang sedang berjalan
         const bulanIni = Utils.tglHariIni().substring(0, 7);
-        
         let pesanPeringatan = `Peringatan: Menarik data bulan ${selectedMonth} akan MENIMPA data lokal di bulan tersebut.\n\nLanjutkan?`;
         let warnaTema = 'var(--cloud)';
         
-        // Jika mengunduh bulan ini, berikan peringatan ekstra keras
         if (selectedMonth === bulanIni) {
             pesanPeringatan = `⚠️ PERINGATAN KERAS! ⚠️\n\nAnda akan mengunduh data bulan ini (${selectedMonth}).\n\nJika Anda baru saja mencatat data baru di HP ini dan BELUM melakukan UPLOAD, catatan baru tersebut akan HILANG tertimpa data dari Cloud.\n\nSudah yakin ingin menimpa data lokal?`;
             warnaTema = 'var(--danger)';
@@ -1623,7 +1640,6 @@
         });
     }
 
-    // REFACTOR: Eksekusi Load dengan Strict JSON Check & Zero-Trust Merge
     function executeLoadCloud(selectedMonth) {
         if (isNetworkProcessing) return showToast("Sedang memproses jaringan...", 'var(--cloud)');
         isNetworkProcessing = true;
@@ -1638,8 +1654,6 @@
         .then(async res => { 
             clearTimeout(timeoutId); 
             if(!res.ok) throw new Error("Gagal HTTP: " + res.status); 
-            
-            // PENGAMANAN KRITIS: Cek apakah respons benar-benar JSON
             const textResponse = await res.text();
             try {
                 return JSON.parse(textResponse);
@@ -1649,17 +1663,14 @@
         })
         .then(data => {
             if(data && typeof data === 'object' && Array.isArray(data.income)) {
-                // Backup Data Lokal (Rollback Point)
                 const backupDB = JSON.stringify(AppState.db);
                 
                 try {
-                    // Pembersihan data bulan terkait yang aman
                     const isTargetMonth = (dateStr) => dateStr && dateStr.startsWith(selectedMonth);
                     AppState.db.income = AppState.db.income.filter(i => !isTargetMonth(i.date));
                     AppState.db.expense = AppState.db.expense.filter(e => !isTargetMonth(e.date));
                     AppState.db.mutations = AppState.db.mutations.filter(m => !isTargetMonth(m.date));
 
-                    // Injeksi Data Cloud
                     data.income.forEach(i => AppState.db.income.push({...i, amount: Math.abs(Number(i.amount))}));
                     data.expense.forEach(e => AppState.db.expense.push({...e, amount: Math.abs(Number(e.amount))}));
                     data.mutations.forEach(m => AppState.db.mutations.push({...m, amount: Math.abs(Number(m.amount))}));
@@ -1672,7 +1683,6 @@
                         });
                     }
 
-                    // Logika Zero-Trust Merge untuk Ekstra
                     const mergeEkstraAman = (lokalArr, cloudArr) => {
                         if (!cloudArr || !Array.isArray(cloudArr)) return;
                         cloudArr.forEach(cItem => {
@@ -1683,7 +1693,6 @@
                                 const lItem = lokalArr[idx];
                                 const safeLocalPayments = Array.isArray(lItem.paymentIds) ? lItem.paymentIds : [];
                                 const safeCloudPayments = Array.isArray(cItem.paymentIds) ? cItem.paymentIds : [];
-                                // Menggabungkan array ID unik menggunakan Set
                                 const mergedPayments = [...new Set([...safeLocalPayments, ...safeCloudPayments])];
                                 
                                 let finalStatus = (lItem.status === 'selesai' || cItem.status === 'selesai') ? 'selesai' : 'aktif';
@@ -1713,7 +1722,6 @@
                     showToast("Data bulan " + selectedMonth + " berhasil ditarik!", 'var(--cloud)');
                     
                 } catch (e) {
-                    // Rollback instan jika memori penuh atau gagal
                     AppState.db = JSON.parse(backupDB);
                     showPopup('alert', "Gagal memproses data! Memori HP penuh atau data rusak. Sistem dikembalikan ke awal.", 'var(--danger)');
                 }
@@ -1729,7 +1737,7 @@
     }
 
     // =========================================================
-    // 8. UPDATE UI & NAVIGASI
+    // 9. UPDATE UI & NAVIGASI
     // =========================================================
     function promptResetFormulir() {
         showPopup('confirm', 'Bersihkan formulir saat ini?', 'var(--danger)', resetFormulirUtama);
@@ -1843,7 +1851,7 @@
         
         let displayTxt = customDisplay !== null ? customDisplay : (nilai === "" ? "-- Tanpa Plot --" : nilai);
         
-        if (inputId === 'out-plot' || inputId === 'edit-plot-val' || inputId === 'cicil-plot') {
+        if (inputId === 'out-plot' || inputId === 'edit-plot-val' || inputId === 'cicil-plot' || inputId === 'extra-plot') {
              if (nilai !== "") {
                  const plotObj = AppState.db.plots.find(p => p.id === nilai);
                  if (plotObj) {
@@ -1883,9 +1891,12 @@
             const isTagihan = (nilai === 'tagihan');
             document.getElementById('extra-freq-group').classList.toggle('hidden', !isTagihan);
             document.getElementById('extra-duedate-group').classList.toggle('hidden', !isTagihan);
+            
+            document.getElementById('extra-plot-group').classList.toggle('hidden', !isTagihan);
+            document.getElementById('extra-nama-label').innerText = isTagihan ? 'Nama Pengingat' : 'Nama Penitip';
+            
             document.getElementById('extra-principal-group').classList.add('hidden'); 
             document.getElementById('extra-wallet-group').style.display = isTagihan ? 'none' : 'block';
-            document.getElementById('extra-nama-label').innerText = isTagihan ? 'Nama (Pengingat/Peminjam)' : 'Nama Penitip';
         }
     }
 
@@ -1958,15 +1969,10 @@
         
         if (wasHidden && optEl) {
             optEl.classList.remove('hidden');
-
             const rect = e.currentTarget.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-            
-            if (rect.top > (windowHeight * 0.55)) {
-                optEl.classList.add('drop-up');
-            } else {
-                optEl.classList.remove('drop-up');
-            }
+            if (rect.top > (windowHeight * 0.55)) optEl.classList.add('drop-up');
+            else optEl.classList.remove('drop-up');
         }
     }
 
@@ -1975,7 +1981,6 @@
         const menu = document.getElementById('dropdown-menu');
         const wasHidden = menu ? menu.classList.contains('hidden') : true;
         tutupSemuaMenuDrop();
-        
         if (wasHidden && menu) {
             menu.classList.remove('hidden'); 
             const kebabSvg = document.querySelector('#kebab-btn svg');
@@ -1992,32 +1997,25 @@
     }
 
     // =========================================================
-    // 9. LOGIKA CRUD & PROTEKSI BUG
+    // 10. LOGIKA CRUD & PROTEKSI BUG
     // =========================================================
     function prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx) {
         const warnaTema = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
         const descTitleCase = Utils.toTitleCase(ket);
-        
         const safeNom = Math.round(nom);
         AppState.db[tipe].push({ id: Utils.buatId(), date: tgl, desc: descTitleCase, amount: safeNom, wallet: dmp, plotId: plt });
         simpanDatabase();
         
         if(document.getElementById(`${pfx}-amount`)) document.getElementById(`${pfx}-amount`).value = '';
         if(document.getElementById(`${pfx}-desc`)) document.getElementById(`${pfx}-desc`).value = '';
-        
         if (tipe === 'expense') setCustomVal('out-plot', 'out-plot-trigger', 'out-plot-opts', '');
         
         const hrIni = Utils.tglHariIni();
         const dateEl = document.getElementById(`${pfx}-date`);
-        if(dateEl) {
-            dateEl.dataset.rawDate = hrIni;
-            dateEl.value = Utils.formatTglTampil(hrIni);
-        }
+        if(dateEl) { dateEl.dataset.rawDate = hrIni; dateEl.value = Utils.formatTglTampil(hrIni); }
 
         limitRekapIn = 15; limitRekapOut = 15;
-        updateRekap();
-        updateWalletDropdownBalances();
-        showToast("Catatan berhasil disimpan!", warnaTema); 
+        updateRekap(); updateWalletDropdownBalances(); showToast("Catatan berhasil disimpan!", warnaTema); 
     }
 
     function saveData(event, tipe) {
@@ -2025,22 +2023,16 @@
         isGlobalSubmitting = true;
 
         const btn = event.currentTarget || event.target;
-        if(btn && btn.tagName === 'BUTTON') {
-            btn.disabled = true; 
-        }
+        if(btn && btn.tagName === 'BUTTON') btn.disabled = true; 
         
         const pfx = tipe === 'income' ? 'in' : 'out';
-        
         const dateEl = document.getElementById(`${pfx}-date`);
         const descEl = document.getElementById(`${pfx}-desc`);
         const amountEl = document.getElementById(`${pfx}-amount`);
         const walletEl = document.getElementById(`${pfx}-wallet`);
         const plotEl = document.getElementById(`${pfx}-plot`);
         
-        const resetGlobalSubmit = () => {
-            isGlobalSubmitting = false;
-            if (btn) setTimeout(() => { btn.disabled = false; }, 1500);
-        };
+        const resetGlobalSubmit = () => { isGlobalSubmitting = false; if (btn) setTimeout(() => { btn.disabled = false; }, 1500); };
 
         if(!dateEl || !descEl || !amountEl || !walletEl) return resetGlobalSubmit();
 
@@ -2050,7 +2042,6 @@
         const nom = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
         const dmp = walletEl.value;
         const plt = plotEl ? (plotEl.value || "") : "";
-        
         const warnaTema = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
 
         if (!tgl || rawAmount === '' || isNaN(nom) || nom <= 0 || !ket) {
@@ -2063,28 +2054,14 @@
                 showPopup('alert', `Saldo [${dmp}] tidak mencukupi!`, warnaTema);
                 return resetGlobalSubmit();
             }
-            
-            // Resolusi Deadlock pada Modal PIN saat simpan
             if (dmp === 'Dana Darurat 🔒') {
                 return verifyPin(() => {
-                    try {
-                        prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx);
-                    } catch (e) {
-                        showPopup('alert', "Terjadi kesalahan sistem saat menyimpan. Cek memori HP Anda.", warnaTema);
-                    } finally {
-                        resetGlobalSubmit();
-                    }
+                    try { prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx); } catch (e) { showPopup('alert', "Gagal memproses simpan.", warnaTema); } finally { resetGlobalSubmit(); }
                 }, resetGlobalSubmit);
             }
         }
         
-        try {
-            prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx);
-        } catch (e) {
-            showPopup('alert', "Terjadi kesalahan sistem saat menyimpan. Cek memori HP Anda.", warnaTema);
-        } finally {
-            resetGlobalSubmit();
-        }
+        try { prosesSimpanAkhir(tipe, tgl, ket, nom, dmp, plt, pfx); } catch (e) { showPopup('alert', "Gagal memproses simpan.", warnaTema); } finally { resetGlobalSubmit(); }
     }
 
     function editData(tipe, idItem) {
@@ -2095,30 +2072,21 @@
         const isCicilan = ekstraTerkait.some(x => x.paymentIds && x.paymentIds.includes(idItem));
         
         let isEditSebagian = false;
-
         if (isAwal || isCicilan) {
-            if (tipe === 'income') {
-                return showPopup('alert', 'Batal: Ini adalah Riwayat Menu Ekstra. Silakan Edit atau Hapus melalui Menu Titik Empat Kiri.', 'var(--danger)');
-            } else {
-                isEditSebagian = true; 
-                showToast("Pilih Plot untuk alokasi Cicilan ini.", 'var(--wa-blue)');
-            }
+            if (tipe === 'income') return showPopup('alert', 'Batal: Ini Riwayat Menu Ekstra. Edit/Hapus melalui Menu Titik Empat.', 'var(--danger)');
+            else { isEditSebagian = true; showToast("Pilih Plot untuk alokasi Cicilan ini.", 'var(--wa-blue)'); }
         }
 
-        const data = AppState.db[tipe].find(i => i.id === idItem);
-        if (!data) return;
+        const data = AppState.db[tipe].find(i => i.id === idItem); if (!data) return;
         
         const titleColor = tipe === 'income' ? 'var(--wa-green)' : 'var(--danger)';
         const elTitle = document.getElementById('edit-modal-title');
         
         elTitle.innerText = isEditSebagian ? 'Alokasi Plot Cicilan' : (tipe === 'income' ? 'Edit Pemasukan' : 'Edit Pengeluaran');
         elTitle.style.color = isEditSebagian ? 'var(--wa-blue)' : titleColor;
-        
         document.querySelector('#edit-modal .modal-box').style.borderTopColor = isEditSebagian ? 'var(--wa-blue)' : titleColor;
         
-        const btnSave = document.getElementById('edit-btn-save');
-        const btnCancel = document.getElementById('edit-btn-cancel');
-        
+        const btnSave = document.getElementById('edit-btn-save'), btnCancel = document.getElementById('edit-btn-cancel');
         const btnColor = isEditSebagian ? 'var(--wa-blue)' : titleColor;
         btnSave.style.cssText = `background-color: #222222 !important; color: ${btnColor} !important; border: 1px solid ${btnColor} !important; opacity: 0.4;`;
         btnCancel.style.cssText = `background-color: #222222 !important; color: ${btnColor} !important; border: 1px solid ${btnColor} !important;`;
@@ -2130,115 +2098,77 @@
         document.getElementById('edit-wallet').value = data.wallet || 'Tunai';
         document.getElementById('edit-wallet-trigger').innerText = `${data.wallet || 'Tunai'} (Rp ${getSaldoDompet(data.wallet || 'Tunai').toLocaleString('id-ID')})`;
         
-        const elDesc = document.getElementById('edit-desc');
-        const elAmount = document.getElementById('edit-amount');
-        const elWalletTrig = document.getElementById('edit-wallet-trigger');
-        const elDate = document.getElementById('edit-date');
+        const elDesc = document.getElementById('edit-desc'), elAmount = document.getElementById('edit-amount'), elWalletTrig = document.getElementById('edit-wallet-trigger'), elDate = document.getElementById('edit-date');
 
         if (isEditSebagian) {
-            elDesc.readOnly = true; elDesc.style.opacity = '0.5';
-            elAmount.readOnly = true; elAmount.style.opacity = '0.5';
-            elWalletTrig.style.pointerEvents = 'none'; elWalletTrig.style.opacity = '0.5';
-            elDate.style.pointerEvents = 'none'; elDate.style.opacity = '0.5';
+            elDesc.readOnly = true; elDesc.style.opacity = '0.5'; elAmount.readOnly = true; elAmount.style.opacity = '0.5';
+            elWalletTrig.style.pointerEvents = 'none'; elWalletTrig.style.opacity = '0.5'; elDate.style.pointerEvents = 'none'; elDate.style.opacity = '0.5';
         } else {
-            elDesc.readOnly = false; elDesc.style.opacity = '1';
-            elAmount.readOnly = false; elAmount.style.opacity = '1';
-            elWalletTrig.style.pointerEvents = 'auto'; elWalletTrig.style.opacity = '1';
-            elDate.style.pointerEvents = 'auto'; elDate.style.opacity = '1';
+            elDesc.readOnly = false; elDesc.style.opacity = '1'; elAmount.readOnly = false; elAmount.style.opacity = '1';
+            elWalletTrig.style.pointerEvents = 'auto'; elWalletTrig.style.opacity = '1'; elDate.style.pointerEvents = 'auto'; elDate.style.opacity = '1';
         }
 
         const wadahPlot = document.getElementById('edit-plot-container');
         if (tipe === 'expense') {
-            wadahPlot.style.display = 'block';
-            buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val');
-            setCustomVal('edit-plot-val', 'edit-plot-trigger', 'edit-plot-opts', data.plotId || ''); 
-        } else {
-            wadahPlot.style.display = 'none';
-        }
+            wadahPlot.style.display = 'block'; buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val'); setCustomVal('edit-plot-val', 'edit-plot-trigger', 'edit-plot-opts', data.plotId || ''); 
+        } else { wadahPlot.style.display = 'none'; }
         
-        updateWalletDropdownBalances();
-        document.getElementById('edit-modal').classList.remove('hidden');
-        document.body.classList.add('modal-open');
+        updateWalletDropdownBalances(); document.getElementById('edit-modal').classList.remove('hidden'); document.body.classList.add('modal-open');
         
         btnSave.onclick = () => {
-            btnSave.disabled = true;
-            setTimeout(() => { if (btnSave) btnSave.disabled = false; }, 1500);
+            btnSave.disabled = true; setTimeout(() => { if (btnSave) btnSave.disabled = false; }, 1500);
 
             const plotBaru = document.getElementById('edit-plot-val').value || "";
 
             if (isEditSebagian) {
-                data.plotId = plotBaru;
-                simpanDatabase(); 
-                tutupModalAman('edit-modal');
-                updateRekap(); updatePlotList();
+                data.plotId = plotBaru; simpanDatabase(); tutupModalAman('edit-modal'); updateRekap(); updatePlotList();
                 return showToast("Plot cicilan berhasil diperbarui!", 'var(--wa-blue)');
             }
 
-            const rawAmount = document.getElementById('edit-amount').value.trim();
-            const nomBaru = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
-            
+            const rawAmount = document.getElementById('edit-amount').value.trim(), nomBaru = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
             if (rawAmount === '' || isNaN(nomBaru) || nomBaru <= 0) return showPopup('alert', "Jumlah tidak valid!", titleColor);
             
-            const dompetBaru = document.getElementById('edit-wallet').value;
-            const tglBaru = document.getElementById('edit-date').dataset.rawDate;
-            const descBaru = Utils.toTitleCase(document.getElementById('edit-desc').value.trim());
-            
+            const dompetBaru = document.getElementById('edit-wallet').value, tglBaru = document.getElementById('edit-date').dataset.rawDate, descBaru = Utils.toTitleCase(document.getElementById('edit-desc').value.trim());
             if (!descBaru) return showPopup('alert', "Keterangan tidak boleh kosong!", titleColor);
 
             const nominalLama = data.amount, dompetLama = data.wallet;
-            let saldoAman = true;
-            let pesanError = "Saldo akan minus!";
+            let saldoAman = true, pesanError = "Saldo akan minus!";
             
             if (tipe === 'expense') {
-                let saldoTersedia = getSaldoDompet(dompetBaru);
-                if (dompetBaru === dompetLama) saldoTersedia += nominalLama;
+                let saldoTersedia = getSaldoDompet(dompetBaru); if (dompetBaru === dompetLama) saldoTersedia += nominalLama;
                 if (saldoTersedia < nomBaru) { saldoAman = false; pesanError = `Batal: Saldo ${dompetBaru} kurang ${Utils.formatRp(nomBaru - saldoTersedia)}!`; }
             } else if (tipe === 'income') {
                 let saldoSaatIniLama = getSaldoDompet(dompetLama);
                 if (dompetBaru !== dompetLama) {
-                    if (saldoSaatIniLama < nominalLama) { 
-                        saldoAman = false; 
-                        pesanError = `Batal: Uang di [${dompetLama}] sebagian sudah dipakai. Tidak bisa ditarik/dipindah ke [${dompetBaru}].`; 
-                    }
+                    if (saldoSaatIniLama < nominalLama) { saldoAman = false; pesanError = `Batal: Uang di [${dompetLama}] sebagian sudah dipakai.`; }
                 } else {
-                    if (saldoSaatIniLama - nominalLama + nomBaru < 0) { 
-                        saldoAman = false; 
-                        pesanError = `Batal: Pengurangan nominal membuat dompet minus.`; 
-                    }
+                    if (saldoSaatIniLama - nominalLama + nomBaru < 0) { saldoAman = false; pesanError = `Batal: Pengurangan nominal membuat dompet minus.`; }
                 }
             }
 
             if (!saldoAman) return showPopup('alert', pesanError, titleColor);
 
             const butuhPin = (dompetLama === 'Dana Darurat 🔒' || dompetBaru === 'Dana Darurat 🔒');
-            
             const execEdit = () => {
                 data.amount = nomBaru; data.wallet = dompetBaru; data.date = tglBaru; data.desc = descBaru; data.plotId = plotBaru; 
-                simpanDatabase(); 
-                tutupModalAman('edit-modal');
-                updateRekap(); updatePlotList(); updateWalletDropdownBalances();
-                showToast("Data berhasil diedit!", titleColor);
+                simpanDatabase(); tutupModalAman('edit-modal'); updateRekap(); updatePlotList(); updateWalletDropdownBalances(); showToast("Data berhasil diedit!", titleColor);
             };
 
-            if (butuhPin) { tutupModalAman('edit-modal'); verifyPin(execEdit); } 
-            else { execEdit(); }
+            if (butuhPin) { tutupModalAman('edit-modal'); verifyPin(execEdit); } else { execEdit(); }
         };
     }
 
-    // REFACTOR: Kunci thread deleteItem dengan isGlobalSubmitting untuk menahan Timing Attack
     function deleteItem(event, tipe, idItem) {
         event.stopPropagation();
-        
         if (isGlobalSubmitting) return; 
         
         const ekstraTerkait = [...AppState.db.pengingat, ...AppState.db.hutang, ...AppState.db.piutang, ...AppState.db.spaylater, ...AppState.db.spinjam];
         const isAwal = ekstraTerkait.some(x => x.incomeId === idItem || x.expenseId === idItem);
         const isCicilan = ekstraTerkait.some(x => x.paymentIds && x.paymentIds.includes(idItem));
         
-        if (isAwal || isCicilan) return showPopup('alert', 'Batal: Ini adalah Riwayat Menu Ekstra (Pengingat/Hutang/Shopee)! Hapus langsung melalui Menu Titik Empat Kiri.', 'var(--danger)');
+        if (isAwal || isCicilan) return showPopup('alert', 'Batal: Ini Riwayat Menu Ekstra! Hapus langsung melalui Menu Titik Empat.', 'var(--danger)');
 
-        const dataTarget = AppState.db[tipe].find(x => x.id === idItem);
-        if (!dataTarget) return;
+        const dataTarget = AppState.db[tipe].find(x => x.id === idItem); if (!dataTarget) return;
 
         isGlobalSubmitting = true; 
         const unlockThread = () => { isGlobalSubmitting = false; };
@@ -2247,7 +2177,6 @@
             const kekur = getSaldoDompet(dataTarget.wallet) - dataTarget.amount;
             if (kekur < 0) { unlockThread(); return showPopup('alert', `Batal: Saldo dompet kurang ${Utils.formatRp(Math.abs(kekur))}!`, 'var(--danger)'); }
         }
-        
         if (tipe === 'mutations') {
             const kekur = getSaldoDompet(dataTarget.to) - dataTarget.amount;
             if (kekur < 0) { unlockThread(); return showPopup('alert', `Batal: Uang tujuan terlanjur dipakai, kurang ${Utils.formatRp(Math.abs(kekur))}!`, 'var(--danger)'); }
@@ -2263,69 +2192,37 @@
                     showToast("Riwayat terhapus!", 'var(--danger)');
                 } finally { unlockThread(); }
             };
-
-            if (butuhPin) { setTimeout(() => verifyPin(proceedDelete, unlockThread), 200); } 
-            else { proceedDelete(); }
+            if (butuhPin) { setTimeout(() => verifyPin(proceedDelete, unlockThread), 200); } else { proceedDelete(); }
         });
 
-        // Tangkap event batal di modal untuk melepaskan penguncian thread
         const btnBatal = document.getElementById('modal-btn-cancel');
         if (btnBatal) {
             const originalClick = btnBatal.onclick;
-            btnBatal.onclick = () => {
-                if (originalClick) originalClick();
-                unlockThread();
-            };
+            btnBatal.onclick = () => { if (originalClick) originalClick(); unlockThread(); };
         }
     }
 
     function openMutationModal() { 
-        tutupSemuaMenuDrop();
-
-        document.getElementById('mutation-modal').classList.remove('hidden'); 
-        document.body.classList.add('modal-open');
-        
+        tutupSemuaMenuDrop(); document.getElementById('mutation-modal').classList.remove('hidden'); document.body.classList.add('modal-open');
         const mutDateEl = document.getElementById('mut-date');
-        if (mutDateEl) {
-            const hrIni = Utils.tglHariIni();
-            mutDateEl.dataset.rawDate = hrIni;
-            mutDateEl.value = Utils.formatTglTampil(hrIni);
-        }
-
-        setCustomVal('mut-from', 'mut-from-trigger', 'mut-from-opts', 'Tunai');
-        setCustomVal('mut-to', 'mut-to-trigger', 'mut-to-opts', 'Bank');
-        updateWalletDropdownBalances(); 
+        if (mutDateEl) { const hrIni = Utils.tglHariIni(); mutDateEl.dataset.rawDate = hrIni; mutDateEl.value = Utils.formatTglTampil(hrIni); }
+        setCustomVal('mut-from', 'mut-from-trigger', 'mut-from-opts', 'Tunai'); setCustomVal('mut-to', 'mut-to-trigger', 'mut-to-opts', 'Bank'); updateWalletDropdownBalances(); 
     }
     
-    function closeMutationModal() { 
-        tutupModalAman('mutation-modal');
-        document.getElementById('mut-amount').value = ''; 
-    }
+    function closeMutationModal() { tutupModalAman('mutation-modal'); document.getElementById('mut-amount').value = ''; }
 
     function processMutation(event) {
-        if (isGlobalSubmitting) return; 
-        isGlobalSubmitting = true;
+        if (isGlobalSubmitting) return; isGlobalSubmitting = true;
+        const btn = event.currentTarget || event.target; if(btn && btn.tagName === 'BUTTON') btn.disabled = true; 
 
-        const btn = event.currentTarget || event.target;
-        if(btn && btn.tagName === 'BUTTON') btn.disabled = true; 
-
-        const asalRaw = document.getElementById('mut-from').value;
-        const tujuanRaw = document.getElementById('mut-to').value;
-        
+        const asalRaw = document.getElementById('mut-from').value, tujuanRaw = document.getElementById('mut-to').value;
         const asalMap = { 'tunai': 'Tunai', 'bank': 'Bank', 'e-wallet': 'e-Wallet', 'dana darurat': 'Dana Darurat', 'dana darurat 🔒': 'Dana Darurat 🔒' };
-        const asal = asalMap[String(asalRaw || '').trim().toLowerCase()] || 'Tunai';
-        const tujuan = asalMap[String(tujuanRaw || '').trim().toLowerCase()] || 'Tunai';
+        const asal = asalMap[String(asalRaw || '').trim().toLowerCase()] || 'Tunai', tujuan = asalMap[String(tujuanRaw || '').trim().toLowerCase()] || 'Tunai';
 
-        const rawAmount = document.getElementById('mut-amount').value.trim();
-        const nominal = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
+        const rawAmount = document.getElementById('mut-amount').value.trim(), nominal = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
+        const tglEl = document.getElementById('mut-date'), tglMutasi = tglEl && tglEl.dataset.rawDate ? tglEl.dataset.rawDate : Utils.tglHariIni();
         
-        const tglEl = document.getElementById('mut-date');
-        const tglMutasi = tglEl && tglEl.dataset.rawDate ? tglEl.dataset.rawDate : Utils.tglHariIni();
-        
-        const resetGlobalSubmit = () => {
-            isGlobalSubmitting = false;
-            if (btn) btn.disabled = false; 
-        };
+        const resetGlobalSubmit = () => { isGlobalSubmitting = false; if (btn) btn.disabled = false; };
 
         if (asal === tujuan) { showPopup('alert', 'Dompet asal & tujuan sama!', '#ffffff'); return resetGlobalSubmit(); }
         if (rawAmount === '' || isNaN(nominal) || nominal <= 0) { showPopup('alert', 'Jumlah tidak valid!', '#ffffff'); return resetGlobalSubmit(); }
@@ -2334,47 +2231,23 @@
         const executeTransfer = () => {
             try {
                 const newMutation = Object.freeze({ id: Utils.buatId(), date: tglMutasi, from: asal, to: tujuan, amount: nominal });
-                AppState.db.mutations.push(newMutation);
-                simpanDatabase(); closeMutationModal(); updateRekap(); updateWalletDropdownBalances();
-                showToast('Mutasi Berhasil!', '#ffffff');
-            } finally {
-                resetGlobalSubmit();
-            }
+                AppState.db.mutations.push(newMutation); simpanDatabase(); closeMutationModal(); updateRekap(); updateWalletDropdownBalances(); showToast('Mutasi Berhasil!', '#ffffff');
+            } finally { resetGlobalSubmit(); }
         };
 
-        // Resolusi Deadlock pada Modal PIN saat mutasi
-        if (asal === 'Dana Darurat 🔒') { 
-            closeMutationModal(); 
-            verifyPin(executeTransfer, resetGlobalSubmit);
-        } else { 
-            executeTransfer(); 
-        }
+        if (asal === 'Dana Darurat 🔒') { closeMutationModal(); verifyPin(executeTransfer, resetGlobalSubmit); } else { executeTransfer(); }
     }
     
     function savePlot(event) {
-        const btn = document.querySelector('#plot .btn-blue');
-        if (btn) { btn.disabled = true; setTimeout(() => btn.disabled = false, 1500); }
-
-        const nama = Utils.toTitleCase(document.getElementById('plot-name').value.trim());
-        const rawAmount = document.getElementById('plot-amount').value.trim();
-        const target = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
+        const btn = document.querySelector('#plot .btn-blue'); if (btn) { btn.disabled = true; setTimeout(() => btn.disabled = false, 1500); }
+        const nama = Utils.toTitleCase(document.getElementById('plot-name').value.trim()), rawAmount = document.getElementById('plot-amount').value.trim(), target = Math.abs(Math.round(Number(rawAmount.replace(/[^\d]/g, ''))));
         
-        if (AppState.db.plots.some(p => p.name.toLowerCase() === nama.toLowerCase())) {
-            return showPopup('alert', "Nama Plot sudah digunakan!", 'var(--wa-blue)');
-        }
-        if (!nama || rawAmount === '' || isNaN(target) || target <= 0) {
-            return showPopup('alert', "Isi Nama & Target dengan benar!", 'var(--wa-blue)');
-        }
+        if (AppState.db.plots.some(p => p.name.toLowerCase() === nama.toLowerCase())) return showPopup('alert', "Nama Plot sudah digunakan!", 'var(--wa-blue)');
+        if (!nama || rawAmount === '' || isNaN(target) || target <= 0) return showPopup('alert', "Isi Nama & Target dengan benar!", 'var(--wa-blue)');
         
-        AppState.db.plots.push({ id: Utils.buatId(), name: nama, target: target });
-        simpanDatabase(); document.getElementById('plot-name').value = ''; document.getElementById('plot-amount').value = '';
-        
-        buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot');
-        buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val');
-        buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
-        
-        updatePlotList(); 
-        showToast("Alokasi Dibuat!", 'var(--wa-blue)');
+        AppState.db.plots.push({ id: Utils.buatId(), name: nama, target: target }); simpanDatabase(); document.getElementById('plot-name').value = ''; document.getElementById('plot-amount').value = '';
+        buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot'); buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val'); buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
+        updatePlotList(); showToast("Alokasi Dibuat!", 'var(--wa-blue)');
     }
 
     function editPlot(idPlot, jenis) {
@@ -2383,22 +2256,15 @@
             if (!val) return;
             if (isAngka) {
                 const newTarget = Math.abs(Math.round(Number(val.replace(/[^\d]/g, ''))));
-                if (val.trim() === '' || isNaN(newTarget) || newTarget <= 0) {
-                    return showPopup('alert', 'Target tidak valid!', 'var(--wa-blue)');
-                }
+                if (val.trim() === '' || isNaN(newTarget) || newTarget <= 0) return showPopup('alert', 'Target tidak valid!', 'var(--wa-blue)');
                 plot[jenis] = newTarget;
             } else { 
                 const cekNama = Utils.toTitleCase(val.trim());
-                if (AppState.db.plots.some(p => p.id !== idPlot && p.name.toLowerCase() === cekNama.toLowerCase())) {
-                    return showPopup('alert', 'Nama Plot sudah digunakan!', 'var(--wa-blue)');
-                }
+                if (AppState.db.plots.some(p => p.id !== idPlot && p.name.toLowerCase() === cekNama.toLowerCase())) return showPopup('alert', 'Nama Plot sudah digunakan!', 'var(--wa-blue)');
                 plot[jenis] = cekNama; 
             }
             simpanDatabase(); updatePlotList(); updateRekap();
-            
-            buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot');
-            buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val');
-            buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
+            buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot'); buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val'); buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
             showToast("Plot diperbarui!", 'var(--wa-blue)');
         }, plot[jenis], isAngka);
     }
@@ -2406,125 +2272,46 @@
     function deletePlot(idPlot) {
         showPopup('delete', "Hapus plot ini?\nRiwayat lama akan menjadi 'Tanpa Plot'.", 'var(--danger)', () => {
             AppState.db.plots = AppState.db.plots.filter(p => p.id !== idPlot);
-            
-            AppState.db.expense.forEach(e => {
-                if (e.plotId === idPlot) e.plotId = '';
-            });
-
-            AppState.db.pengingat.forEach(p => {
-                if (p.defaultPlotId === idPlot) p.defaultPlotId = '';
-            });
-            
-            ['out-plot', 'edit-plot-val', 'cicil-plot'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el && el.value === idPlot) setCustomVal(id, `${id}-trigger`, `${id}-opts`, '');
-            });
-            
+            AppState.db.expense.forEach(e => { if (e.plotId === idPlot) e.plotId = ''; });
+            AppState.db.pengingat.forEach(p => { if (p.defaultPlotId === idPlot) p.defaultPlotId = ''; });
+            ['out-plot', 'edit-plot-val', 'cicil-plot'].forEach(id => { const el = document.getElementById(id); if (el && el.value === idPlot) setCustomVal(id, `${id}-trigger`, `${id}-opts`, ''); });
             simpanDatabase(); updatePlotList(); updateRekap();
-            
-            buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot');
-            buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val');
-            buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
-
+            buildPlotOptions('out-plot-opts', 'out-plot-trigger', 'out-plot'); buildPlotOptions('edit-plot-opts', 'edit-plot-trigger', 'edit-plot-val'); buildPlotOptions('cicil-plot-opts', 'cicil-plot-trigger', 'cicil-plot');
             showToast("Plot dihapus!", 'var(--danger)');
         });
     }
+
     // =========================================================
-    // 10. RENDER ENGINE & GRAFIK (DOM Optimization & Memory Fix)
+    // 11. RENDER ENGINE & GRAFIK (DOM Optimization & Memory Fix)
     // =========================================================
     function updatePlotList() {
-        const filterEl = document.getElementById('plot-month-filter');
-        if(!filterEl) return;
-        const filterBulan = filterEl.dataset.rawDate;
-        const wadah = document.getElementById('plot-list');
+        const filterEl = document.getElementById('plot-month-filter'); if(!filterEl) return;
+        const filterBulan = filterEl.dataset.rawDate, wadah = document.getElementById('plot-list');
         
         if (AppState.db.plots.length === 0) { 
             wadah.innerHTML = '<div style="text-align:center; color:var(--border-color); padding: 40px 0;"><svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" fill="none" style="margin-bottom:10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><br>- Belum ada alokasi -</div>'; 
             return; 
         }
         
-        const isAllTime = filterBulan === 'ALL';
-        let currentPlotFilter = "";
-        if (!isAllTime) {
-            let [fbY, fbM] = filterBulan.split('-');
-            currentPlotFilter = `${fbY}-${fbM}`;
-        }
+        const isAllTime = filterBulan === 'ALL'; let currentPlotFilter = "";
+        if (!isAllTime) { let [fbY, fbM] = filterBulan.split('-'); currentPlotFilter = `${fbY}-${fbM}`; }
 
         const expenseValid = AppState.db.expense.filter(e => isAllTime ? true : e.date.startsWith(currentPlotFilter));
-
         const svgHistory = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>`;
 
-        let htmlList = '';
-        const sortedPlots = [...AppState.db.plots].sort((a, b) => a.name.localeCompare(b.name));
+        let htmlList = ''; const sortedPlots = [...AppState.db.plots].sort((a, b) => a.name.localeCompare(b.name));
 
-        // Mencegah DOM-Injection menggunakan Utils.amanJS pada parameter fungsi inline
         sortedPlots.forEach(p => {
             const terpakai = expenseValid.reduce((sum, e) => e.plotId === p.id ? sum + e.amount : sum, 0);
-            
             if (isAllTime) {
-                htmlList += `<div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <strong class="editable" onclick="editPlot('${p.id}','name')" style="font-size:14px; word-break:break-word; flex:1; padding-right:10px;">${Utils.amanHTML(p.name)}</strong>
-                        <div class="delete-btn-wrapper" onclick="deletePlot('${p.id}')">
-                            <svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
-                                <path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-light); font-weight:500;">
-                        <span style="color: var(--text-muted);">Total Terpakai Akumulasi (Semua Waktu):</span>
-                        <span><strong style="color:var(--danger)">${Utils.formatRp(terpakai)}</strong></span>
-                    </div>
-                    <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:-4px; margin-bottom:2px;">
-                        <button class="extra-btn" style="color:var(--text-muted); border:1px solid var(--border-color); display:flex; align-items:center; padding:4px; background: transparent; margin:0;" onclick="bukaRincianPlot('${p.id}', '${Utils.amanJS(p.name)}', 'var(--wa-blue)')" title="Rincian Pengeluaran">${svgHistory}</button>
-                    </div>
-                </div>`;
+                htmlList += `<div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; flex-direction:column; gap:8px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong class="editable" onclick="editPlot('${p.id}','name')" style="font-size:14px; word-break:break-word; flex:1; padding-right:10px;">${Utils.amanHTML(p.name)}</strong><div class="delete-btn-wrapper" onclick="deletePlot('${p.id}')"><svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-width="1.5"></circle><path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path></svg></div></div><div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-light); font-weight:500;"><span style="color: var(--text-muted);">Total Terpakai Akumulasi:</span><span><strong style="color:var(--danger)">${Utils.formatRp(terpakai)}</strong></span></div><div style="display:flex; justify-content:flex-end; align-items:center; margin-top:-4px; margin-bottom:2px;"><button class="extra-btn" style="color:var(--text-muted); border:1px solid var(--border-color); display:flex; align-items:center; padding:4px; background: transparent; margin:0;" onclick="bukaRincianPlot('${p.id}', '${Utils.amanJS(p.name)}', 'var(--wa-blue)')" title="Rincian Pengeluaran">${svgHistory}</button></div></div>`;
             } else {
-                let selisih = p.target - terpakai;
-                let tSelisih, nSelisih, cSelisih, cBayar;
-                
-                if (selisih > 0) {
-                    tSelisih = "Sisa"; 
-                    nSelisih = `(${Utils.formatRp(selisih)})`; 
-                    cSelisih = "var(--wa-green)";
-                    cBayar = "var(--wa-green)";
-                } else if (selisih < 0) {
-                    tSelisih = "Lebih"; 
-                    nSelisih = `(+${Utils.formatRp(Math.abs(selisih))})`; 
-                    cSelisih = "var(--danger)";
-                    cBayar = "var(--danger)";
-                } else {
-                    tSelisih = "Pas"; 
-                    nSelisih = "(Rp 0)"; 
-                    cSelisih = "#ffffff";
-                    cBayar = "#ffffff";
-                }
-                
-                let persen = 0;
-                if (p.target > 0) { persen = Math.min((terpakai / p.target) * 100, 100); }
-                else if (terpakai > 0) { persen = 100; }
-                
-                htmlList += `<div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <strong class="editable" onclick="editPlot('${p.id}','name')" style="font-size:14px; word-break:break-word; flex:1; padding-right:10px;">${Utils.amanHTML(p.name)}</strong>
-                        <div class="delete-btn-wrapper" onclick="deletePlot('${p.id}')">
-                            <svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
-                                <path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-light); font-weight:500;">
-                        <span class="editable" onclick="editPlot('${p.id}','target')" style="color: var(--text-muted);">Target: ${Utils.formatRp(p.target)}</span>
-                        <span class="editable" onclick="editPlot('${p.id}','target')">${tSelisih}: <strong style="color:${cSelisih}">${nSelisih}</strong></span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-muted); margin-top:-4px; margin-bottom:2px;">
-                        <span>Bayar: <span style="color:${cBayar}; font-weight:bold;">${Utils.formatRp(terpakai)}</span></span>
-                        <button class="extra-btn" style="color:var(--text-muted); border:1px solid var(--border-color); display:flex; align-items:center; padding:4px; background: transparent; margin:0;" onclick="bukaRincianPlot('${p.id}', '${Utils.amanJS(p.name)}', '${cBayar}')" title="Rincian Pengeluaran">${svgHistory}</button>
-                    </div>
-                    <div class="progress-container" style="height: 6px; background: #000; border-radius: 3px; overflow: hidden;"><div class="progress-bar" style="height: 100%; width:${Math.min(persen, 100)}%; background: ${cBayar};"></div></div>
-                </div>`;
+                let selisih = p.target - terpakai, tSelisih, nSelisih, cSelisih, cBayar;
+                if (selisih > 0) { tSelisih = "Sisa"; nSelisih = `(${Utils.formatRp(selisih)})`; cSelisih = "var(--wa-green)"; cBayar = "var(--wa-green)"; } 
+                else if (selisih < 0) { tSelisih = "Lebih"; nSelisih = `(+${Utils.formatRp(Math.abs(selisih))})`; cSelisih = "var(--danger)"; cBayar = "var(--danger)"; } 
+                else { tSelisih = "Pas"; nSelisih = "(Rp 0)"; cSelisih = "#ffffff"; cBayar = "#ffffff"; }
+                let persen = 0; if (p.target > 0) { persen = Math.min((terpakai / p.target) * 100, 100); } else if (terpakai > 0) { persen = 100; }
+                htmlList += `<div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; flex-direction:column; gap:8px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong class="editable" onclick="editPlot('${p.id}','name')" style="font-size:14px; word-break:break-word; flex:1; padding-right:10px;">${Utils.amanHTML(p.name)}</strong><div class="delete-btn-wrapper" onclick="deletePlot('${p.id}')"><svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-width="1.5"></circle><path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path></svg></div></div><div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-light); font-weight:500;"><span class="editable" onclick="editPlot('${p.id}','target')" style="color: var(--text-muted);">Target: ${Utils.formatRp(p.target)}</span><span class="editable" onclick="editPlot('${p.id}','target')">${tSelisih}: <strong style="color:${cSelisih}">${nSelisih}</strong></span></div><div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-muted); margin-top:-4px; margin-bottom:2px;"><span>Bayar: <span style="color:${cBayar}; font-weight:bold;">${Utils.formatRp(terpakai)}</span></span><button class="extra-btn" style="color:var(--text-muted); border:1px solid var(--border-color); display:flex; align-items:center; padding:4px; background: transparent; margin:0;" onclick="bukaRincianPlot('${p.id}', '${Utils.amanJS(p.name)}', '${cBayar}')" title="Rincian Pengeluaran">${svgHistory}</button></div><div class="progress-container" style="height: 6px; background: #000; border-radius: 3px; overflow: hidden;"><div class="progress-bar" style="height: 100%; width:${Math.min(persen, 100)}%; background: ${cBayar};"></div></div></div>`;
             }
         });
         wadah.innerHTML = htmlList;
@@ -2537,57 +2324,30 @@
             if(document.getElementById('rekap').classList.contains('hidden')) return;
             const val = document.getElementById('rekap-search').value.trim();
             if (val.length > 0 && val.length < 3) return; 
-            limitRekapIn = 15; limitRekapOut = 15;
-            updateRekap();
+            limitRekapIn = 15; limitRekapOut = 15; updateRekap();
         }, 400); 
     }
 
-    function clearSearch() { 
-        document.getElementById('rekap-search').value = ''; 
-        limitRekapIn = 15; limitRekapOut = 15;
-        document.getElementById('list-income').scrollTop = 0; document.getElementById('list-expense').scrollTop = 0;
-        updateRekap(); 
-    }
+    function clearSearch() { document.getElementById('rekap-search').value = ''; limitRekapIn = 15; limitRekapOut = 15; document.getElementById('list-income').scrollTop = 0; document.getElementById('list-expense').scrollTop = 0; updateRekap(); }
 
-    function loadMoreRekap(tipe) {
-        if (tipe === 'in') limitRekapIn += 15; else limitRekapOut += 15;
-        updateRekap();
-    }
+    function loadMoreRekap(tipe) { if (tipe === 'in') limitRekapIn += 15; else limitRekapOut += 15; updateRekap(); }
 
     function updateRekap(isEkstraUpdate = false) {
-        const startEl = document.getElementById('rekap-start-date');
-        const endEl = document.getElementById('rekap-end-date');
+        const startEl = document.getElementById('rekap-start-date'), endEl = document.getElementById('rekap-end-date');
         if(!startEl || !endEl) return;
 
-        const tglStart = startEl.dataset.rawDate || '2000-01-01';
-        const tglEnd = endEl.dataset.rawDate || '2100-01-01';
-        const kunciRaw = document.getElementById('rekap-search').value.trim();
-        const searchTerms = kunciRaw.toLowerCase().split(' ').filter(t => t.trim() !== '');
-        const isSearching = kunciRaw.length >= 3;
+        const tglStart = startEl.dataset.rawDate || '2000-01-01', tglEnd = endEl.dataset.rawDate || '2100-01-01';
+        const kunciRaw = document.getElementById('rekap-search').value.trim(), searchTerms = kunciRaw.toLowerCase().split(' ').filter(t => t.trim() !== ''), isSearching = kunciRaw.length >= 3;
 
-        const elMasuk = document.getElementById('list-income');
-        const elKeluar = document.getElementById('list-expense');
-        const scrollIn = elMasuk.scrollTop;
-        const scrollOut = elKeluar.scrollTop;
-
-        const labelSisa = document.getElementById('label-sisa-saldo');
-        const h2Sisa = document.getElementById('total-balance');
-        const badgeEl = document.getElementById('health-badge');
+        const elMasuk = document.getElementById('list-income'), elKeluar = document.getElementById('list-expense'), scrollIn = elMasuk.scrollTop, scrollOut = elKeluar.scrollTop;
+        const labelSisa = document.getElementById('label-sisa-saldo'), h2Sisa = document.getElementById('total-balance'), badgeEl = document.getElementById('health-badge');
               
         if (kunciRaw) { 
-            document.getElementById('rekap-focus-hide').classList.add('hidden'); 
-            document.getElementById('clear-search-btn').classList.remove('hidden'); 
-            document.getElementById('label-bulan-pencarian').innerText = "HASIL PENCARIAN:"; 
-            if(labelSisa) labelSisa.style.display = 'none';
-            if(h2Sisa) h2Sisa.style.display = 'none';
-            if(badgeEl) badgeEl.style.display = 'none';
+            document.getElementById('rekap-focus-hide').classList.add('hidden'); document.getElementById('clear-search-btn').classList.remove('hidden'); document.getElementById('label-bulan-pencarian').innerText = "HASIL PENCARIAN:"; 
+            if(labelSisa) labelSisa.style.display = 'none'; if(h2Sisa) h2Sisa.style.display = 'none'; if(badgeEl) badgeEl.style.display = 'none';
         } else { 
-            document.getElementById('rekap-focus-hide').classList.remove('hidden'); 
-            document.getElementById('clear-search-btn').classList.add('hidden');
-            document.getElementById('label-bulan-pencarian').innerText = "RENTANG WAKTU:";
-            if(labelSisa) labelSisa.style.display = 'block';
-            if(h2Sisa) h2Sisa.style.display = 'block';
-            if(badgeEl) badgeEl.style.display = '';
+            document.getElementById('rekap-focus-hide').classList.remove('hidden'); document.getElementById('clear-search-btn').classList.add('hidden'); document.getElementById('label-bulan-pencarian').innerText = "RENTANG WAKTU:";
+            if(labelSisa) labelSisa.style.display = 'block'; if(h2Sisa) h2Sisa.style.display = 'block'; if(badgeEl) badgeEl.style.display = '';
         }
 
         const gabungan = [
@@ -2595,61 +2355,35 @@
             ...AppState.db.expense.map(item => ({ id: item.id, date: item.date, desc: item.desc, amount: item.amount, type: 'expense', walletInfo: item.wallet, plotId: item.plotId })),
             ...AppState.db.mutations.map(item => ({ id: item.id, date: item.date, desc: `Mutasi: ${item.from} ➔ ${item.to}`, amount: item.amount, type: 'mutations', walletInfo: `Transfer` }))
         ].filter(item => {
-            const itemDate = item.date || '2000-01-01';
-            const inDateRange = isSearching || (itemDate >= tglStart && itemDate <= tglEnd);
+            const itemDate = item.date || '2000-01-01', inDateRange = isSearching || (itemDate >= tglStart && itemDate <= tglEnd);
             if (!inDateRange) return false;
-            
-            if (isSearching) {
-                const combinedStr = `${item.desc} ${item.walletInfo} ${item.date} ${item.amount}`.toLowerCase();
-                return searchTerms.every(term => combinedStr.includes(term));
-            }
+            if (isSearching) { const combinedStr = `${item.desc} ${item.walletInfo} ${item.date} ${item.amount}`.toLowerCase(); return searchTerms.every(term => combinedStr.includes(term)); }
             return true; 
         });
 
         gabungan.sort((a, b) => {
             const dateA = a.date || '2000-01-01', dateB = b.date || '2000-01-01';
             if (dateA > dateB) return -1; if (dateA < dateB) return 1;
-            
-            const getTimestamp = (id) => {
-                const parts = String(id || '').split('_');
-                return parts.length >= 2 ? parseInt(parts[1], 36) || 0 : 0;
-            };
+            const getTimestamp = (id) => { const parts = String(id || '').split('_'); return parts.length >= 2 ? parseInt(parts[1], 36) || 0 : 0; };
             const timeA = getTimestamp(a.id), timeB = getTimestamp(b.id);
             if (timeB !== timeA) return timeB - timeA; 
-            
-            const countA = parseInt(String(a.id || '').split('_').pop() || '0', 10);
-            const countB = parseInt(String(b.id || '').split('_').pop() || '0', 10);
+            const countA = parseInt(String(a.id || '').split('_').pop() || '0', 10), countB = parseInt(String(b.id || '').split('_').pop() || '0', 10);
             return countB - countA;
         });
         
-        let visibleExp = [], hitungMasukBulanIni = 0, hitungKeluarBulanIni = 0;
-        let dataMasukArr = [], dataKeluarArr = [];
-
+        let visibleExp = [], hitungMasukBulanIni = 0, hitungKeluarBulanIni = 0, dataMasukArr = [], dataKeluarArr = [];
         gabungan.forEach(item => {
-            if (item.type === 'income') { 
-                hitungMasukBulanIni += item.amount; 
-                dataMasukArr.push(item); 
-            } else { 
-                if(item.type === 'expense') { 
-                    hitungKeluarBulanIni += item.amount; 
-                    // REFACTOR: Deep mapping untuk mencegah Dangling Pointers
-                    visibleExp.push({ desc: item.desc, amount: item.amount, plotId: item.plotId || "" }); 
-                }
+            if (item.type === 'income') { hitungMasukBulanIni += item.amount; dataMasukArr.push(item); } 
+            else { 
+                if(item.type === 'expense') { hitungKeluarBulanIni += item.amount; visibleExp.push({ desc: item.desc, amount: item.amount, plotId: item.plotId || "" }); }
                 dataKeluarArr.push(item); 
             }
         });
         
-        const dataMasukTampil = dataMasukArr.slice(0, limitRekapIn);
-        const dataKeluarTampil = dataKeluarArr.slice(0, limitRekapOut);
+        const dataMasukTampil = dataMasukArr.slice(0, limitRekapIn), dataKeluarTampil = dataKeluarArr.slice(0, limitRekapOut);
 
         const renderBaris = (item, isMut, isIn) => {
-            return `<li><div class="editable" onclick="editData('${item.type}','${item.id}')"><div class="history-desc-text">
-                <small style="color:var(--text-muted)">${Utils.formatTglTampil(item.date)}</small><br>${Utils.amanHTML(item.desc)}</div>
-                <div style="font-size:11px; font-weight:700;" class="${isMut ? 'mutasi-text' : (isIn ? 'income-text' : 'expense-text')}">
-                ${isMut ? '⇄' : (isIn ? '+' : '-')} ${Utils.formatRp(item.amount)} <br><small style="color:var(--text-muted); font-weight:500; font-size: 9px;">(${item.walletInfo})</small></div></div>
-                <div class="delete-btn-wrapper" onclick="deleteItem(event, '${item.type}','${item.id}')">
-                    <svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-width="1.5"></circle><path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path></svg>
-                </div></li>`;
+            return `<li><div class="editable" onclick="editData('${item.type}','${item.id}')"><div class="history-desc-text"><small style="color:var(--text-muted)">${Utils.formatTglTampil(item.date)}</small><br>${Utils.amanHTML(item.desc)}</div><div style="font-size:11px; font-weight:700;" class="${isMut ? 'mutasi-text' : (isIn ? 'income-text' : 'expense-text')}">${isMut ? '⇄' : (isIn ? '+' : '-')} ${Utils.formatRp(item.amount)} <br><small style="color:var(--text-muted); font-weight:500; font-size: 9px;">(${item.walletInfo})</small></div></div><div class="delete-btn-wrapper" onclick="deleteItem(event, '${item.type}','${item.id}')"><svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-width="1.5"></circle><path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path></svg></div></li>`;
         };
 
         const emptyState = '<li style="justify-content:center; color:var(--border-color); font-size:11px; border: none; padding-top: 30px;"><div style="text-align:center;"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>- Kosong -</div></li>';
@@ -2657,36 +2391,20 @@
         elMasuk.innerHTML = dataMasukTampil.length ? dataMasukTampil.map(item => renderBaris(item, false, true)).join('') : emptyState;
         elKeluar.innerHTML = dataKeluarTampil.length ? dataKeluarTampil.map(item => renderBaris(item, item.type === 'mutations', false)).join('') : emptyState;
         
-        const containerIn = document.getElementById('load-more-in-container');
-        const containerOut = document.getElementById('load-more-out-container');
-        
+        const containerIn = document.getElementById('load-more-in-container'), containerOut = document.getElementById('load-more-out-container');
         containerIn.innerHTML = dataMasukArr.length > limitRekapIn ? `<button class="extra-btn" style="background:transparent; border:1px dashed var(--wa-green); color:var(--wa-green); width:100%; margin-top:10px; padding:10px;" onclick="loadMoreRekap('in')">⬇️ MUAT LEBIH BANYAK (${dataMasukArr.length - limitRekapIn})</button>` : '';
         containerOut.innerHTML = dataKeluarArr.length > limitRekapOut ? `<button class="extra-btn" style="background:transparent; border:1px dashed var(--danger); color:var(--danger); width:100%; margin-top:10px; padding:10px;" onclick="loadMoreRekap('out')">⬇️ MUAT LEBIH BANYAK (${dataKeluarArr.length - limitRekapOut})</button>` : '';
 
         if(!kunciRaw && !isEkstraUpdate) { elMasuk.scrollTop = scrollIn; elKeluar.scrollTop = scrollOut; }
 
-        const sTunai = getSaldoDompet('Tunai'), sBank = getSaldoDompet('Bank'), sEwal = getSaldoDompet('e-Wallet');
-        const sDarurat1 = getSaldoDompet('Dana Darurat'), sDarurat2 = getSaldoDompet('Dana Darurat 🔒');
+        const sTunai = getSaldoDompet('Tunai'), sBank = getSaldoDompet('Bank'), sEwal = getSaldoDompet('e-Wallet'), sDarurat1 = getSaldoDompet('Dana Darurat'), sDarurat2 = getSaldoDompet('Dana Darurat 🔒');
         const sTotal = sTunai + sBank + sEwal + sDarurat1 + sDarurat2;
 
         if (badgeEl) {
-            if (hitungMasukBulanIni === 0 && hitungKeluarBulanIni === 0) {
-                badgeEl.innerText = "➖ Belum Ada Transaksi"; 
-                badgeEl.style.color = "#888888"; 
-                badgeEl.style.backgroundColor = "rgba(136,136,136,0.15)";
-            } else if (hitungKeluarBulanIni > hitungMasukBulanIni) {
-                badgeEl.innerText = "🔥 Darurat! Defisit Saldo"; 
-                badgeEl.style.color = "var(--danger)"; 
-                badgeEl.style.backgroundColor = "rgba(255,59,48,0.15)";
-            } else if (hitungKeluarBulanIni >= hitungMasukBulanIni * 0.8) {
-                badgeEl.innerText = "⚠️ Hati-hati, Pengeluaran Tinggi"; 
-                badgeEl.style.color = "#FFA500"; 
-                badgeEl.style.backgroundColor = "rgba(255,165,0,0.15)";
-            } else {
-                badgeEl.innerText = "🌟 Keuangan Aman"; 
-                badgeEl.style.color = "var(--wa-green)"; 
-                badgeEl.style.backgroundColor = "rgba(0,200,83,0.15)";
-            }
+            if (hitungMasukBulanIni === 0 && hitungKeluarBulanIni === 0) { badgeEl.innerText = "➖ Belum Ada Transaksi"; badgeEl.style.color = "#888888"; badgeEl.style.backgroundColor = "rgba(136,136,136,0.15)"; } 
+            else if (hitungKeluarBulanIni > hitungMasukBulanIni) { badgeEl.innerText = "🔥 Darurat! Defisit Saldo"; badgeEl.style.color = "var(--danger)"; badgeEl.style.backgroundColor = "rgba(255,59,48,0.15)"; } 
+            else if (hitungKeluarBulanIni >= hitungMasukBulanIni * 0.8) { badgeEl.innerText = "⚠️ Hati-hati, Pengeluaran Tinggi"; badgeEl.style.color = "#FFA500"; badgeEl.style.backgroundColor = "rgba(255,165,0,0.15)"; } 
+            else { badgeEl.innerText = "🌟 Keuangan Aman"; badgeEl.style.color = "var(--wa-green)"; badgeEl.style.backgroundColor = "rgba(0,200,83,0.15)"; }
         }
 
         animateValue(document.getElementById('total-balance'), AppState.prevBalances.total || 0, sTotal, 600);
@@ -2702,14 +2420,13 @@
         AppState.grafikSaatIni = { tunai: sTunai, bank: sBank, ewal: sEwal, darurat1: sDarurat1, darurat2: sDarurat2, visibleExpenses: visibleExp };
     }
     
-    function openChartModal() { 
-        tutupSemuaMenuDrop();
-        document.getElementById('chart-modal').classList.remove('hidden'); 
-        document.body.classList.add('modal-open');
-        requestAnimationFrame(() => renderGrafik()); 
-    }
+    function openChartModal() { tutupSemuaMenuDrop(); document.getElementById('chart-modal').classList.remove('hidden'); document.body.classList.add('modal-open'); requestAnimationFrame(() => renderGrafik()); }
     
-    function closeChartModal() { tutupModalAman('chart-modal'); }
+    function closeChartModal() { 
+        if (AppState.charts.arusKas) { AppState.charts.arusKas.destroy(); AppState.charts.arusKas = null; }
+        if (AppState.charts.portofolio) { AppState.charts.portofolio.destroy(); AppState.charts.portofolio = null; }
+        tutupModalAman('chart-modal'); 
+    }
 
     function getDynamicColor(index) {
         const brightColors = ['#FF6B6B', '#4ECDC4', '#C7F464', '#FFE66D', '#FFD166', '#EF476F', '#118AB2', '#073B4C', '#A05195', '#F15BB5', '#00F5D4', '#9B5DE5', '#FEE440', '#00BBF9', '#F1948A', '#8338EC', '#3A86FF', '#FF006E', '#FFA69E', '#86BBD8', '#2F4858', '#F6AE2D', '#F26419', '#33658A', '#820263', '#D90368', '#00CC66', '#E2C044', '#5BC0BE', '#E55934'];
@@ -2723,14 +2440,12 @@
         
         let pengeluaranMap = {}, totalKeluar = 0;
         d.visibleExpenses.forEach(e => {
-            let pName = e.desc; 
-            if (e.plotId) { const plotObj = AppState.db.plots.find(p => p.id === e.plotId); if (plotObj) pName = plotObj.name; }
+            let pName = e.desc; if (e.plotId) { const plotObj = AppState.db.plots.find(p => p.id === e.plotId); if (plotObj) pName = plotObj.name; }
             if (!pengeluaranMap[pName]) pengeluaranMap[pName] = 0;
             pengeluaranMap[pName] += e.amount; totalKeluar += e.amount;
         });
         
-        let arrayPengeluaran = [];
-        for (let key in pengeluaranMap) arrayPengeluaran.push({ label: key, value: Math.max(0, pengeluaranMap[key]) });
+        let arrayPengeluaran = []; for (let key in pengeluaranMap) arrayPengeluaran.push({ label: key, value: Math.max(0, pengeluaranMap[key]) });
         arrayPengeluaran.sort((a, b) => b.value - a.value);
 
         let labelsRinci = [], dataRinci = [], colorRinci = [];
@@ -2740,40 +2455,30 @@
         if (pengeluaranKosong) { labelsRinci = ['Kosong']; dataRinci = [1]; colorRinci = ['#333333']; }
         
         AppState.charts.arusKas = new Chart(document.getElementById('cashChart').getContext('2d'), { 
-            type: 'doughnut', 
-            data: { labels: labelsRinci, datasets: [{ data: dataRinci, backgroundColor: colorRinci, borderWidth: 3, borderColor: '#151515' }] }, 
+            type: 'doughnut', data: { labels: labelsRinci, datasets: [{ data: dataRinci, backgroundColor: colorRinci, borderWidth: 3, borderColor: '#151515' }] }, 
             options: { aspectRatio: 1.5, cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled: !pengeluaranKosong } }, animation: { animateScale: true, animateRotate: true, duration: 600 } } 
         });
 
-        const customLegendContainer = document.getElementById('custom-legend');
-        customLegendContainer.innerHTML = '';
-        
+        const customLegendContainer = document.getElementById('custom-legend'); customLegendContainer.innerHTML = '';
         if (!pengeluaranKosong) {
             let htmlLegend = '';
             arrayPengeluaran.forEach((item, index) => {
-                const isLongText = item.label.length > 16;
-                const runningClass = isLongText ? 'running-text' : '';
+                const isLongText = item.label.length > 16, runningClass = isLongText ? 'running-text' : '';
                 htmlLegend += `<div class="custom-legend-item"><div class="legend-color-box" style="background-color: ${colorRinci[index]};"></div><div class="legend-label-container"><span class="legend-label-text ${runningClass}">${Utils.amanHTML(item.label)}</span></div><div class="legend-value">${Utils.formatRp(item.value)}</div></div>`;
             });
-            customLegendContainer.innerHTML = htmlLegend;
-            customLegendContainer.style.display = 'block';
+            customLegendContainer.innerHTML = htmlLegend; customLegendContainer.style.display = 'block';
         } else { customLegendContainer.style.display = 'none'; }
         
         const totalTersedia = Math.max(d.tunai, 0) + Math.max(d.bank, 0) + Math.max(d.ewal, 0) + Math.max(d.darurat1, 0) + Math.max(d.darurat2, 0); 
         const portKosong = totalTersedia <= 0;
         
         AppState.charts.portofolio = new Chart(document.getElementById('portChart').getContext('2d'), { 
-            type: 'doughnut', 
-            data: { 
-                labels: portKosong ? ['Kosong'] : ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'], 
-                datasets: [{ data: portKosong ? [1] : [Math.max(d.tunai, 0), Math.max(d.bank, 0), Math.max(d.ewal, 0), Math.max(d.darurat1, 0), Math.max(d.darurat2, 0)], backgroundColor: portKosong ? ['#333333'] : ['#2ecc71', '#3A86FF', '#9B5DE5', '#F26419', '#ff3b30'], borderWidth: 3, borderColor: '#151515' }] 
-            }, 
+            type: 'doughnut', data: { labels: portKosong ? ['Kosong'] : ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'], datasets: [{ data: portKosong ? [1] : [Math.max(d.tunai, 0), Math.max(d.bank, 0), Math.max(d.ewal, 0), Math.max(d.darurat1, 0), Math.max(d.darurat2, 0)], backgroundColor: portKosong ? ['#333333'] : ['#2ecc71', '#3A86FF', '#9B5DE5', '#F26419', '#ff3b30'], borderWidth: 3, borderColor: '#151515' }] }, 
             options: { aspectRatio: 1.5, cutout: '70%', plugins: { legend: { display: !portKosong, position: 'right', labels: { color: '#cccccc', font: { size: 10, family: 'Montserrat' }, boxWidth: 12 } }, tooltip: { enabled: !portKosong } }, animation: { animateScale: true, animateRotate: true, duration: 600 } } 
         });
     }
-
-    // =========================================================
-    // 11. EXCEL IMPORT / EXPORT (UNIVERSAL REGEX PARSER)
+         // =========================================================
+    // 12. EXCEL IMPORT / EXPORT (UNIVERSAL REGEX PARSER)
     // =========================================================
     const prepExtraForExcel = (dataArray) => {
         if(!dataArray) return [];
@@ -2870,7 +2575,10 @@
             let nilaiTenor = newItem.tenor !== undefined ? newItem.tenor : newItem.Tenor;
             newItem.tenor = Math.max(1, Math.floor(Number(nilaiTenor) || 1));
             if (!newItem.tipe) newItem.tipe = 'titipan'; if (!newItem.freq) newItem.freq = 'sekali';
+            
+            newItem.defaultPlotId = newItem.defaultPlotId || newItem.PLOT_LENGKET || newItem.Plot_Lengket || '';
             if (newItem.tipe === 'titipan') newItem.defaultPlotId = ''; 
+            
             return newItem;
         });
     };
@@ -2933,13 +2641,11 @@
                 }
             });
 
-            // Recover Protected Data from both Local AND Excel to prevent Ghost Deficit
             let recoveredIncome = AppState.db.income.filter(i => protectedIds.has(i.id));
             let recoveredExpense = AppState.db.expense.filter(e => protectedIds.has(e.id));
             
             AppState.tempImport.forEach(r => { 
                 if (r.ID && protectedIds.has(r.ID)) {
-                    // Penyelamatan data asli dari file Excel
                     const d = parseExcelDate(r.Tanggal); if (!d) return;
                     const tipe = String(r.Tipe).toUpperCase(), nom = parseAngkaUniversal(r.Jumlah);
                     if (isNaN(nom) || nom <= 0) return;
@@ -2995,7 +2701,7 @@
     }
 
     // =========================================================
-    // 12. DATE PICKER KALENDER 
+    // 13. DATE PICKER KALENDER 
     // =========================================================
     const Picker = { mode: 'date', curr: new Date(), sel: new Date(), targetId: '', theme: '' };
     const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'], BlnPdk = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -3084,7 +2790,7 @@
     function terapkanVersi() { const elVersi = document.getElementById('app-version-display'); if (elVersi) elVersi.innerText = `VERSI ${APP_VERSION} (PRO)`; }
 
     // =========================================================
-    // 13. FITUR EKSTRA (GROUPING, CICILAN, WA & NOTIFIKASI)
+    // 14. FITUR EKSTRA (GROUPING, CICILAN, WA & NOTIFIKASI)
     // =========================================================
     const DB_EKSTRA = {
         pengingat: { nama: 'Pengingat', warna: 'var(--wa-blue)', msk: 'dynamic', klr: 'expense', idTrx: 'incomeId', lblWallet: 'Masuk ke Dompet', teksSelesai: 'Bayar / Kembalikan menggunakan dompet:', descMsk: 'Titipan dari ', descKlr: 'Kembali/Bayar: ', btn: 'PROSES' },
@@ -3107,11 +2813,30 @@
 
         AppState.db[ModeEkstraAktif].forEach(t => {
             t.paidAmount = t.paidAmount || 0; if (!t.paymentIds) t.paymentIds = [];
-            if (t.status === 'selesai') { selesaiItems.push(t); } else {
-                const nm = String(t.nama).trim().toLowerCase();
-                if (!groups[nm]) groups[nm] = { namaDisplay: String(t.nama).trim(), items: [], totalSisa: 0 };
-                groups[nm].items.push(t);
-                const sisa = t.amount - t.paidAmount; groups[nm].totalSisa += sisa; totalAktifAll += sisa;
+            if (t.status === 'selesai') { 
+                selesaiItems.push(t); 
+            } else {
+                let baseName = String(t.nama).trim();
+                let itemName = baseName;
+
+                if (ModeEkstraAktif === 'spaylater') {
+                    const matchKurung = baseName.match(/^(.*?)\s*\(([^)]+)\)$/);
+                    if (matchKurung) {
+                        baseName = matchKurung[1].trim(); 
+                        itemName = matchKurung[2].trim(); 
+                    } else if (t.catatan) {
+                        itemName = baseName + " - " + t.catatan;
+                    }
+                }
+
+                const groupKey = (baseName + "_" + (t.noWA || "")).toLowerCase();
+                if (!groups[groupKey]) { groups[groupKey] = { namaDisplay: baseName, items: [], totalSisa: 0 }; }
+
+                t.itemNameDisplay = itemName; 
+                groups[groupKey].items.push(t);
+                const sisa = t.amount - t.paidAmount; 
+                groups[groupKey].totalSisa += sisa; 
+                totalAktifAll += sisa;
             }
         });
         selesaiItems.reverse();
@@ -3121,10 +2846,25 @@
         if (AppState.db[ModeEkstraAktif].length === 0) { ul.innerHTML = `<li style="text-align:center; padding: 30px 0; color:var(--border-color); font-size:11px;">- Belum ada catatan ${cfg.nama.toLowerCase()} -</li>`; return; }
 
         let html = ''; const svgHistory = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>`;
+        const iconWA = `<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>`;
         
         Object.values(groups).sort((a, b) => a.namaDisplay.localeCompare(b.namaDisplay)).forEach(g => {
             const grpId = 'grp-' + Utils.buatId();
-            html += `<div class="group-header" style="color:${cfg.warna}" onclick="document.getElementById('${grpId}').classList.toggle('show')"><span style="font-weight:700; font-size:12px; color:#fff;">👤 ${Utils.amanHTML(g.namaDisplay).toUpperCase()}</span><span style="font-weight:700; font-size:11px;">Sisa: ${Utils.formatRp(g.totalSisa)} ▼</span></div><div id="${grpId}" class="group-items-wrapper">`;
+            
+            let groupWaBtn = '';
+            if (ModeEkstraAktif === 'spaylater' && g.items[0].noWA) {
+                groupWaBtn = `<button class="extra-btn" style="color:#25D366; border:none; background:transparent; display:flex; align-items:center; padding:4px 6px; margin-left:6px;" onclick="event.stopPropagation(); kirimWA('${g.items[0].id}')" title="Kirim WA Rekap Tagihan"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">${iconWA}</svg></button>`;
+            }
+
+            html += `<div class="group-header" style="color:${cfg.warna}" onclick="document.getElementById('${grpId}').classList.toggle('show')">
+                        <div style="display:flex; align-items:center;">
+                            <span style="font-weight:700; font-size:12px; color:#fff;">👤 ${Utils.amanHTML(g.namaDisplay).toUpperCase()}</span>
+                            ${groupWaBtn}
+                        </div>
+                        <span style="font-weight:700; font-size:11px;">Sisa: ${Utils.formatRp(g.totalSisa)} ▼</span>
+                     </div>
+                     <div id="${grpId}" class="group-items-wrapper">`;
+            
             g.items.forEach(t => {
                 const sisa = t.amount - t.paidAmount;
                 let tipeIcon = ModeEkstraAktif === 'pengingat' ? (t.tipe === 'tagihan' ? '📅 ' : '📥 ') : '';
@@ -3135,9 +2875,10 @@
                 const progressHtml = isHanyaTitipan ? '' : `<div class="cicil-progress"><span>(Dicicil: ${Utils.formatRp(t.paidAmount)} / ${Utils.formatRp(t.amount)})</span></div>`;
                 let jatuhTempoHtml = (t.dueDate && t.status !== 'selesai' && (!t.tipe || t.tipe === 'tagihan')) ? `<div style="font-size: 9px; color: var(--danger); font-weight: 600; margin-top: 4px;">Jatuh Tempo: ${Utils.formatTglTampil(t.dueDate)}</div>` : '';
                 const hapusAktifBtn = `<button class="extra-btn-hapus" onclick="hapusExtra('${t.id}')" title="Hapus Catatan Permanen" style="margin-left: 2px; padding: 4px;"><svg class="svg-x" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10" stroke-width="1.5"></circle><path d="m15 9-6 6M9 9l6 6" stroke-width="2"></path></svg></button>`;
-                let waBtn = (t.noWA && t.status !== 'selesai' && (ModeEkstraAktif === 'piutang' || ModeEkstraAktif === 'spaylater' || ModeEkstraAktif === 'spinjam')) ? `<button class="extra-btn" style="color:#25D366; border:none; background:transparent; display:flex; align-items:center; padding:6px;" onclick="kirimWA('${t.id}')" title="Kirim WA"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg></button>` : '';
+                
+                let waBtn = (t.noWA && t.status !== 'selesai' && (ModeEkstraAktif === 'piutang' || ModeEkstraAktif === 'spinjam')) ? `<button class="extra-btn" style="color:#25D366; border:none; background:transparent; display:flex; align-items:center; padding:6px;" onclick="kirimWA('${t.id}')" title="Kirim WA"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">${iconWA}</svg></button>` : '';
 
-                html += `<li class="titipan-item"><div class="titipan-header"><div class="titipan-name"><span style="color:var(--text-light);">${tipeIcon}${Utils.amanHTML(t.nama)}</span>${jatuhTempoHtml}</div><div style="display:flex; align-items:center; gap:10px;"><span class="titipan-amount" style="font-size:13px; font-weight:700; color:${cfg.warna};">${Utils.formatRp(sisa)}</span>${hapusAktifBtn}</div></div>${progressHtml}<div class="titipan-actions" style="display:flex; gap:8px; margin-top:8px; align-items:center;">${showRiwayatBtn}<div style="flex:1;"></div>${waBtn}<button class="extra-btn" style="color:var(--text-light); border:1px solid var(--border-color);" onclick="bukaFormExtra('edit', '${t.id}')">EDIT</button>${btnAksi}</div></li>`;
+                html += `<li class="titipan-item"><div class="titipan-header"><div class="titipan-name"><span style="color:var(--text-light);">${tipeIcon}${Utils.amanHTML(t.itemNameDisplay || t.nama)}</span>${jatuhTempoHtml}</div><div style="display:flex; align-items:center; gap:10px;"><span class="titipan-amount" style="font-size:13px; font-weight:700; color:${cfg.warna};">${Utils.formatRp(sisa)}</span>${hapusAktifBtn}</div></div>${progressHtml}<div class="titipan-actions" style="display:flex; gap:8px; margin-top:8px; align-items:center;">${showRiwayatBtn}<div style="flex:1;"></div>${waBtn}<button class="extra-btn" style="color:var(--text-light); border:1px solid var(--border-color);" onclick="bukaFormExtra('edit', '${t.id}')">EDIT</button>${btnAksi}</div></li>`;
             });
             html += `</div>`; 
         });
@@ -3171,6 +2912,9 @@
         ['extra-nama', 'extra-wa', 'extra-nominal', 'extra-principal', 'extra-id-edit'].forEach(el => document.getElementById(el).value = '');
         document.getElementById('extra-tenor').value = '1'; document.getElementById('extra-duedate-group').classList.add('hidden'); document.getElementById('extra-duedate').dataset.rawDate = ''; document.getElementById('extra-duedate').value = '';
         document.getElementById('extra-tenor-group').classList.add('hidden'); document.getElementById('extra-tipe-group').classList.add('hidden'); document.getElementById('extra-freq-group').classList.add('hidden');
+        document.getElementById('extra-plot-group').classList.add('hidden'); 
+        
+        buildPlotOptions('extra-plot-opts', 'extra-plot-trigger', 'extra-plot');
 
         const waGroup = document.getElementById('extra-wa').parentElement;
         if (ModeEkstraAktif === 'piutang' || ModeEkstraAktif === 'spaylater' || ModeEkstraAktif === 'spinjam') waGroup.classList.remove('hidden'); else waGroup.classList.add('hidden');
@@ -3179,10 +2923,25 @@
             document.getElementById('extra-duedate-group').classList.remove('hidden'); document.getElementById('extra-duedate').dataset.rawDate = tglHariIni; document.getElementById('extra-duedate').value = Utils.formatTglTampil(tglHariIni); document.getElementById('extra-duedate').setAttribute('onclick', `openPicker('extra-duedate', 'date', 'var(--danger)')`);
         }
         
-        if (ModeEkstraAktif === 'spaylater') { document.getElementById('extra-nama').placeholder = "Misal: Dona (Sepatu 3 Bln)"; document.getElementById('extra-nominal-label').innerText = "Total Tagihan (Rp)"; } 
-        else if (ModeEkstraAktif === 'spinjam') { document.getElementById('extra-nama').placeholder = "Misal: Nila (Pinjaman 6 Bln)"; document.getElementById('extra-nominal-label').innerText = "Total Pinjaman (Rp)"; } 
-        else if (ModeEkstraAktif === 'pengingat') { document.getElementById('extra-nama').placeholder = "Misal: Dona (SPP Anak)"; document.getElementById('extra-nominal-label').innerText = "Jumlah (Rp)"; } 
-        else { document.getElementById('extra-nama').placeholder = "Misal: Barla"; document.getElementById('extra-nominal-label').innerText = "Jumlah (Rp)"; }
+        if (ModeEkstraAktif === 'spaylater') { 
+            document.getElementById('extra-nama').placeholder = "Misal: Dona (Sepatu 3 Bln)"; 
+            document.getElementById('extra-nominal-label').innerText = "Total Tagihan (Rp)"; 
+            document.getElementById('extra-nama-label').innerText = "Nama Pembeli"; 
+        } 
+        else if (ModeEkstraAktif === 'spinjam') { 
+            document.getElementById('extra-nama').placeholder = "Misal: Nila (Pinjaman 6 Bln)"; 
+            document.getElementById('extra-nominal-label').innerText = "Total Pinjaman (Rp)"; 
+            document.getElementById('extra-nama-label').innerText = "Nama Peminjam"; 
+        } 
+        else if (ModeEkstraAktif === 'pengingat') { 
+            document.getElementById('extra-nama').placeholder = "Misal: Dona (SPP Anak)"; 
+            document.getElementById('extra-nominal-label').innerText = "Jumlah (Rp)"; 
+        } 
+        else { 
+            document.getElementById('extra-nama').placeholder = "Misal: Barla"; 
+            document.getElementById('extra-nominal-label').innerText = "Jumlah (Rp)"; 
+            document.getElementById('extra-nama-label').innerText = "Nama Peminjam"; 
+        }
 
         let opts = ''; ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'].forEach(w => opts += `<div class="custom-option" onclick="setCustomVal('extra-wallet','extra-wallet-trigger','extra-wallet-opts','${w}')">${w}</div>`);
         document.getElementById('extra-wallet-opts').innerHTML = opts;
@@ -3197,6 +2956,7 @@
                 document.getElementById('extra-freq-opts').innerHTML = `<div class="custom-option" onclick="setCustomVal('extra-freq','extra-freq-trigger','extra-freq-opts','sekali', 'Sekali Saja')">Sekali Saja</div><div class="custom-option" onclick="setCustomVal('extra-freq','extra-freq-trigger','extra-freq-opts','bulanan', 'Rutin Bulanan')">Rutin Bulanan</div><div class="custom-option" onclick="setCustomVal('extra-freq','extra-freq-trigger','extra-freq-opts','tahunan', 'Rutin Tahunan')">Rutin Tahunan</div>`;
                 setCustomVal('extra-tipe','extra-tipe-trigger','extra-tipe-opts','titipan', 'Jenis Pengingat'); setCustomVal('extra-freq','extra-freq-trigger','extra-freq-opts','sekali', 'Sekali Saja');
                 document.getElementById('extra-duedate').dataset.rawDate = tglHariIni; document.getElementById('extra-duedate').value = Utils.formatTglTampil(tglHariIni); document.getElementById('extra-duedate').setAttribute('onclick', `openPicker('extra-duedate', 'date', 'var(--danger)')`);
+                setCustomVal('extra-plot', 'extra-plot-trigger', 'extra-plot-opts', ''); 
             } else if (cfg.msk === 'none') { document.getElementById('extra-principal-group').classList.add('hidden'); document.getElementById('extra-wallet-group').style.display = 'none'; } 
             else { document.getElementById('extra-principal-group').classList.add('hidden'); document.getElementById('extra-wallet-label').innerText = cfg.lblWallet; document.getElementById('extra-wallet-group').style.display = 'block'; }
             setCustomVal('extra-wallet','extra-wallet-trigger','extra-wallet-opts','Tunai');
@@ -3213,6 +2973,8 @@
                     if (data.tipe === 'tagihan') {
                         setCustomVal('extra-tipe','extra-tipe-trigger','extra-tipe-opts','tagihan', 'Tagihan / Agenda Rutin'); document.getElementById('extra-freq-group').classList.remove('hidden'); document.getElementById('extra-duedate-group').classList.remove('hidden');
                         setCustomVal('extra-freq','extra-freq-trigger','extra-freq-opts', data.freq || 'sekali', (data.freq==='bulanan'?'Rutin Bulanan':(data.freq==='tahunan'?'Rutin Tahunan':'Sekali Saja')));
+                        document.getElementById('extra-plot-group').classList.remove('hidden');
+                        setCustomVal('extra-plot', 'extra-plot-trigger', 'extra-plot-opts', data.defaultPlotId || '');
                     } else { setCustomVal('extra-tipe','extra-tipe-trigger','extra-tipe-opts','titipan', 'Titipan Uang'); }
                 }
                 if (data.dueDate) { document.getElementById('extra-duedate').dataset.rawDate = data.dueDate; document.getElementById('extra-duedate').value = Utils.formatTglTampil(data.dueDate); } 
@@ -3232,6 +2994,8 @@
         const rawPrincipal = document.getElementById('extra-principal').value.trim(), principal = Math.abs(Math.round(Number(rawPrincipal.replace(/[^\d]/g, ''))));
         const dateIn = document.getElementById('extra-date').dataset.rawDate || Utils.tglHariIni(), dueDateRaw = document.getElementById('extra-duedate').dataset.rawDate, dueDate = document.getElementById('extra-duedate-group').classList.contains('hidden') || !dueDateRaw ? null : dueDateRaw;
         const tipePengingat = ModeEkstraAktif === 'pengingat' ? document.getElementById('extra-tipe').value : null, freqPengingat = ModeEkstraAktif === 'pengingat' ? document.getElementById('extra-freq').value : null;
+        
+        const plotTagihan = (ModeEkstraAktif === 'pengingat' && tipePengingat === 'tagihan') ? document.getElementById('extra-plot').value : '';
 
         const resetGlobalSubmit = () => { isGlobalSubmitting = false; if (btn) setTimeout(() => { btn.disabled = false; }, 1500); };
         if (!nama || rawAmount === '' || isNaN(amount) || amount <= 0) { showPopup('alert', 'Isi Nama dan Nominal dengan benar!', cfg.warna); return resetGlobalSubmit(); }
@@ -3252,13 +3016,14 @@
                             if (amount < (dataExt.paidAmount || 0)) { showPopup('alert', `Batal: Tagihan baru tidak boleh lebih kecil dari yang sudah dibayar (${Utils.formatRp(dataExt.paidAmount)})!`, 'var(--danger)'); return; }
                             if (dataExt.freq !== freqPengingat) dataExt.origDate = dueDate ? parseInt(dueDate.split('-')[2], 10) : new Date().getDate();
                             dataExt.nama = nama; dataExt.catatan = catatan; dataExt.noWA = noWA; dataExt.amount = amount; dataExt.dateIn = dateIn; dataExt.tenor = tenorVal; if(dueDate !== undefined) dataExt.dueDate = dueDate; if(freqPengingat) dataExt.freq = freqPengingat;
+                            if (ModeEkstraAktif === 'pengingat' && tipePengingat === 'tagihan') dataExt.defaultPlotId = plotTagihan;
                             if (dataExt.paidAmount >= amount) { dataExt.status = 'selesai'; if(!dataExt.dateOut) { const w = new Date(); dataExt.dateOut = `Lunas pada: ${w.getDate()}/${w.getMonth()+1}/${w.getFullYear()}`; } } 
                             else { dataExt.status = 'aktif'; dataExt.dateOut = null; }
                         }
                     } else {
                         let origD = dueDate ? parseInt(dueDate.split('-')[2], 10) : new Date().getDate();
                         let entryBaru = { id: Utils.buatId(), nama: nama, catatan: catatan, noWA: noWA, amount: amount, paidAmount: 0, paymentIds: [], dateIn: dateIn, status: 'aktif', dueDate: dueDate, tenor: tenorVal };
-                        if (ModeEkstraAktif === 'pengingat') { entryBaru.tipe = tipePengingat; entryBaru.freq = freqPengingat; entryBaru.origDate = origD; entryBaru.defaultPlotId = ''; }
+                        if (ModeEkstraAktif === 'pengingat') { entryBaru.tipe = tipePengingat; entryBaru.freq = freqPengingat; entryBaru.origDate = origD; entryBaru.defaultPlotId = plotTagihan; }
                         AppState.db[ModeEkstraAktif].push(entryBaru);
                     }
                 } else { 
@@ -3294,7 +3059,7 @@
                         let origD = dueDate ? parseInt(dueDate.split('-')[2], 10) : new Date().getDate();
                         let entryBaru = { id: idBaru, nama: nama, catatan: catatan, noWA: noWA, amount: amount, principal: uangMasukKeluar, paidAmount: 0, paymentIds: [], dateIn: dateIn, status: 'aktif', dueDate: dueDate, tenor: tenorVal };
                         entryBaru[cfg.idTrx] = idTrx;
-                        if (ModeEkstraAktif === 'pengingat') { entryBaru.tipe = tipePengingat; entryBaru.freq = freqPengingat; entryBaru.origDate = origD; entryBaru.defaultPlotId = ''; }
+                        if (ModeEkstraAktif === 'pengingat') { entryBaru.tipe = tipePengingat; entryBaru.freq = freqPengingat; entryBaru.origDate = origD; entryBaru.defaultPlotId = plotTagihan; }
                         AppState.db[ModeEkstraAktif].push(entryBaru);
                     }
                 }
@@ -3302,13 +3067,7 @@
             } finally { resetGlobalSubmit(); }
         };
 
-        // REFACTOR: Deadlock breaker pada Modal PIN
-        if (butuhPin) { 
-            tutupModalAman('extra-form-modal'); 
-            verifyPin(execSimpanExtra, resetGlobalSubmit); 
-        } else { 
-            execSimpanExtra(); 
-        }
+        if (butuhPin) { tutupModalAman('extra-form-modal'); verifyPin(execSimpanExtra, resetGlobalSubmit); } else { execSimpanExtra(); }
     }
 
     function bukaCicilExtra(id) {
@@ -3339,12 +3098,16 @@
         if (!dataExt) return resetGlobalSubmit();
 
         const rawBayar = document.getElementById('cicil-nominal').value.trim(), bayar = Math.abs(Math.round(Number(rawBayar.replace(/[^\d]/g, ''))));
-        
-        // REFACTOR: Anti-Ghost Balance Check: Menggunakan nilai integer asli sebelum round division
         const sisaSaatIni = Math.round(dataExt.amount - (dataExt.paidAmount || 0));
         
         if (bayar <= 0 || isNaN(bayar)) { showPopup('alert', 'Nominal bayar tidak valid!', 'var(--danger)'); return resetGlobalSubmit(); }
-        if (bayar > sisaSaatIni) { showPopup('alert', `Batal: Maksimal pembayaran adalah sisa tagihan (${Utils.formatRp(sisaSaatIni)})!`, 'var(--danger)'); return resetGlobalSubmit(); }
+        
+        const isTagihanRutin = (ModeEkstraAktif === 'pengingat' && dataExt.tipe === 'tagihan' && dataExt.freq !== 'sekali');
+        if (!isTagihanRutin && bayar > sisaSaatIni) { 
+            showPopup('alert', `Batal: Maksimal pembayaran adalah sisa tagihan (${Utils.formatRp(sisaSaatIni)})!`, 'var(--danger)'); 
+            return resetGlobalSubmit(); 
+        }
+        
         if (cfg.klr === 'expense' && getSaldoDompet(dompet) < bayar) { showPopup('alert', `Batal: Saldo ${dompet} tidak cukup untuk mencicil/membayar!`, 'var(--danger)'); return resetGlobalSubmit(); }
 
         const execProsesCicil = () => {
@@ -3360,16 +3123,8 @@
                 AppState.db[cfg.klr].push({ id: idBayar, date: Utils.tglHariIni(), desc: `${txtKlr}${dataExt.nama}${ketTambahan}`, amount: bayar, wallet: dompet, plotId: plotId });
                 const sisaSetelahBayar = Math.round(dataExt.amount - dataExt.paidAmount);
 
-                // REFACTOR: Ghost Balance Adjustment Entry & Time-Warp Fix
                 if (ModeEkstraAktif === 'pengingat' && dataExt.tipe === 'tagihan' && (dataExt.freq === 'bulanan' || dataExt.freq === 'tahunan')) {
                     if (sisaSetelahBayar <= 100) { 
-                        // INJEKSI JURNAL PENYESUAIAN MICRO-BALANCE
-                        if (sisaSetelahBayar > 0) {
-                            AppState.db[cfg.klr].push({ id: Utils.buatId(), date: Utils.tglHariIni(), desc: `Penyesuaian Sistem: Pembulatan Lunas (${dataExt.nama})`, amount: sisaSetelahBayar, wallet: dompet, plotId: plotId });
-                            dataExt.paymentIds.push(AppState.db[cfg.klr][AppState.db[cfg.klr].length - 1].id);
-                        }
-
-                        // MANUAL UTC PARSE ANTI-DRIFT
                         const rawDateDue = dataExt.dueDate || Utils.tglHariIni();
                         const dParts = rawDateDue.split('-');
                         let nextDue = new Date(parseInt(dParts[0], 10), parseInt(dParts[1], 10) - 1, parseInt(dParts[2], 10));
@@ -3381,10 +3136,9 @@
                         let siklusTerbayar = 1; 
                         if (bayar > bebanPerSiklus && bebanPerSiklus > 0) siklusTerbayar = Math.floor(bayar / bebanPerSiklus);
                         
-                        // TIME-WARP ANCHOR
                         if (dataExt.freq === 'bulanan') {
                             let currentMonth = nextDue.getMonth();
-                            nextDue.setDate(1); // Anchor aman
+                            nextDue.setDate(1); 
                             nextDue.setMonth(currentMonth + siklusTerbayar);
                         } else {
                             nextDue.setFullYear(nextDue.getFullYear() + siklusTerbayar);
@@ -3394,7 +3148,6 @@
                         nextDue.setDate(Math.min(origD, maxDays));
                         
                         dataExt.dueDate = `${nextDue.getFullYear()}-${String(nextDue.getMonth() + 1).padStart(2, '0')}-${String(nextDue.getDate()).padStart(2, '0')}`;
-                        
                         dataExt.paidAmount = sisaSetelahBayar < 0 ? Math.abs(sisaSetelahBayar) : 0; 
                         dataExt.status = 'aktif'; 
                         dataExt.dateOut = null; 
@@ -3405,10 +3158,6 @@
                     }
                 } else {
                     if (sisaSetelahBayar <= 100) { 
-                        if (sisaSetelahBayar > 0) {
-                            AppState.db[cfg.klr].push({ id: Utils.buatId(), date: Utils.tglHariIni(), desc: `Penyesuaian Sistem: Pembulatan Lunas (${dataExt.nama})`, amount: sisaSetelahBayar, wallet: dompet, plotId: plotId });
-                            dataExt.paymentIds.push(AppState.db[cfg.klr][AppState.db[cfg.klr].length - 1].id);
-                        }
                         dataExt.paidAmount = dataExt.amount; 
                         dataExt.status = 'selesai'; 
                         dataExt.dateOut = `Lunas pada: ${tglStr}`; 
@@ -3421,13 +3170,7 @@
             } finally { resetGlobalSubmit(); }
         };
 
-        // REFACTOR: Deadlock breaker pada Modal PIN
-        if (cfg.klr === 'expense' && dompet === 'Dana Darurat 🔒') { 
-            tutupModalAman('extra-cicil-modal'); 
-            verifyPin(execProsesCicil, resetGlobalSubmit); 
-        } else { 
-            execProsesCicil(); 
-        }
+        if (cfg.klr === 'expense' && dompet === 'Dana Darurat 🔒') { tutupModalAman('extra-cicil-modal'); verifyPin(execProsesCicil, resetGlobalSubmit); } else { execProsesCicil(); }
     }
 
     function bukaRiwayatCicilan(idEkstra) {
@@ -3453,7 +3196,6 @@
         });
     }
 
-    // REFACTOR: Tambahan Deadlock Breaker pada hapusExtra
     function hapusExtra(id) {
         const cfg = DB_EKSTRA[ModeEkstraAktif], dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === id); if(!dataExt) return;
         let isHanyaTagihan = (ModeEkstraAktif === 'pengingat' && dataExt.tipe === 'tagihan'), butuhPin = false;
@@ -3517,7 +3259,6 @@
             const sisaTagihanSiklusIni = Math.round(targetKumulatif - (item.paidAmount || 0));
             if (sisaTagihanSiklusIni <= 100) return; 
 
-            // Logika UTC Absolut (Timezone Safe)
             let tglJatuhTempoBulanIni = new Date(Date.UTC(currY, currM, dueD)); 
             if (tglJatuhTempoBulanIni.getUTCDate() !== dueD) tglJatuhTempoBulanIni = new Date(Date.UTC(currY, currM + 1, 0)); 
 
@@ -3533,41 +3274,72 @@
     }
 
     function kirimWA(id) {
-        const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === id); if (!dataExt || !dataExt.noWA) return;
-        let noWA = dataExt.noWA.replace(/\D/g, ''); if (noWA.startsWith('0')) noWA = '62' + noWA.substring(1);
+        const dataExt = AppState.db[ModeEkstraAktif].find(x => x.id === id); 
+        if (!dataExt || !dataExt.noWA) return;
+        
+        let noWA = dataExt.noWA.replace(/\D/g, ''); 
+        if (noWA.startsWith('0')) noWA = '62' + noWA.substring(1);
+
+        if (ModeEkstraAktif === 'spaylater') {
+            const tagihanTerkait = AppState.db.spaylater.filter(x => x.noWA === dataExt.noWA && x.status !== 'selesai');
+
+            let totalSisaSekarang = 0;
+            let totalTagihanBulanIni = 0;
+            let rincianBarang = "";
+
+            tagihanTerkait.forEach((item, index) => {
+                const itemTenor = Math.max(1, parseInt(item.tenor) || 1);
+                const itemTagihanBulananNormal = Math.floor(item.amount / itemTenor);
+                const itemSisaSekarang = Math.round(item.amount - (item.paidAmount || 0));
+                const itemBulanLunas = Math.floor((item.paidAmount || 0) / itemTagihanBulananNormal);
+                const itemSisaTenor = Math.max(0, itemTenor - itemBulanLunas);
+                
+                const itemTagihanBulanIni = itemSisaTenor <= 1 ? itemSisaSekarang : Math.min(itemTagihanBulananNormal, itemSisaSekarang);
+
+                totalSisaSekarang += itemSisaSekarang;
+                totalTagihanBulanIni += itemTagihanBulanIni;
+
+                let namaBarang = item.nama;
+                const matchKurung = item.nama.match(/\(([^)]+)\)/);
+                if (matchKurung) {
+                    namaBarang = matchKurung[1]; 
+                } else if (item.catatan) {
+                    namaBarang = item.nama + " - " + item.catatan;
+                }
+
+                rincianBarang += `${index + 1}. *${namaBarang}*\n   Sisa: Rp ${itemSisaSekarang.toLocaleString('id-ID')} | Cicilan bln ini: *Rp ${itemTagihanBulanIni.toLocaleString('id-ID')}*\n`;
+            });
+
+            const tglJatuhTempo = (tagihanTerkait.length > 0 && tagihanTerkait[0].dueDate) ? Utils.formatTglTampil(tagihanTerkait[0].dueDate) : '-';
+            const sisaSetelahBayar = Math.max(0, totalSisaSekarang - totalTagihanBulanIni);
+
+            const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki beberapa tagihan SPAYLATER aktif yang tercatat pada sistem kami.\n\n📌 *DAFTAR PEMBELIAN:*\n${rincianBarang}\n📊 *REKAPITULASI KESELURUHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n- Total Sisa Tagihan Global : *Rp ${totalSisaSekarang.toLocaleString('id-ID')}*\n- Total Wajib Bayar Bulan Ini : *Rp ${totalTagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nJika Anda melakukan pembayaran untuk seluruh tagihan bulan ini (Rp ${totalTagihanBulanIni.toLocaleString('id-ID')}), maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
+
+            window.open(`https://wa.me/${noWA}?text=${encodeURIComponent(pesan)}`, '_blank');
+            return; 
+        }
+
         const tenor = Math.max(1, parseInt(dataExt.tenor) || 1), tagihanBulananNormal = Math.floor(dataExt.amount / tenor), sisaSekarang = Math.round(dataExt.amount - (dataExt.paidAmount || 0));
         const bulanLunas = Math.floor((dataExt.paidAmount || 0) / tagihanBulananNormal), sisaTenor = Math.max(0, tenor - bulanLunas), teksTenor = (sisaTenor === tenor) ? `aktif ${tenor} bulan` : `aktif (sisa ${sisaTenor} bulan)`;
         let tagihanBulanIni = sisaTenor <= 1 ? sisaSekarang : Math.min(tagihanBulananNormal, sisaSekarang);
         const sisaSetelahBayar = Math.max(0, Math.round(sisaSekarang - tagihanBulanIni)), tglJatuhTempo = dataExt.dueDate ? Utils.formatTglTampil(dataExt.dueDate) : '-', jenis = ModeEkstraAktif.toUpperCase();
+        
         let teksPinjamanAwal = `- Total Tagihan Global : *Rp ${dataExt.amount.toLocaleString('id-ID')}*`;
         if (ModeEkstraAktif === 'spinjam' && dataExt.principal > 0) teksPinjamanAwal = `- Uang Cair (Pinjaman) : *Rp ${dataExt.principal.toLocaleString('id-ID')}*\n- Total Tagihan Global : *Rp ${dataExt.amount.toLocaleString('id-ID')}*`;
-        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
+        
+        let keteranganBarang = '';
+        if (dataExt.catatan) keteranganBarang = ` (${dataExt.catatan})`;
+
+        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor}${keteranganBarang} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
+        
         window.open(`https://wa.me/${noWA}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
-    // =========================================================
-    // 14. GLOBAL ERROR CATCHER (Jaring Pengaman Terakhir)
-    // =========================================================
-    window.addEventListener('error', function(event) {
-        // REFACTOR: Lepaskan gembok Global Submitting jika terjadi error Javascript tiba-tiba
-        isGlobalSubmitting = false; 
-        const modalLoader = document.getElementById('modal-loader'), customModal = document.getElementById('custom-modal');
-        if (customModal && !customModal.classList.contains('hidden') && modalLoader && !modalLoader.classList.contains('hidden')) { tutupModalAman('custom-modal'); }
-        if (event.message && (event.message.includes('ResizeObserver') || event.message.includes('Script error'))) return;
-        console.error("famBARLA System Intercepted an Error:", event.error);
-        showToast("Terjadi gangguan sistem sesaat. Antarmuka dipulihkan.", "var(--danger)");
-    });
-
-    // PWA Visibility Hook: Memastikan jam sinkron & notifikasi terpicu saat aplikasi dibangunkan dari RAM
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
-            jalankanJam(); // Paksa resinkronisasi detik seketika
-            cekNotifikasiJatuhTempo(); // Kalkulasi ulang sisa waktu absolut
-            
-            // Update Rekap untuk memicu visual badge kesehatan terbaru
-            if (!document.getElementById('rekap').classList.contains('hidden')) {
-                updateRekap(false);
-            }
+            jalankanJam(); 
+            cekNotifikasiJatuhTempo(); 
+            if (!document.getElementById('rekap').classList.contains('hidden')) { updateRekap(false); }
         }
     });
 
