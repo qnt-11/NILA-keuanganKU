@@ -3506,7 +3506,7 @@
              if(extractedOuter.note) keteranganBarang = ` (${extractedOuter.note})`;
         }
 
-        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor}${keteranganBarang} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
+        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor} dari${keteranganBarang} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
         
         window.open(`https://wa.me/${noWA}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
