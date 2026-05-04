@@ -1,10 +1,10 @@
 /**
  * SERVICE WORKER uang famBARLA (ENTERPRISE SECURITY & SMART CACHE)
- * Versi 4.0 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
+ * Versi 4.0.1 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
  * Arsitektur: Synchronous WaitUntil SWR, Promise-Queued Garbage Collector, & Anti-Opaque
  */
 
-const APP_VERSION = '4.0'; 
+const APP_VERSION = '4.0.1'; 
 const CACHE_PREFIX = 'uang-fambarla-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -125,7 +125,7 @@ self.addEventListener('fetch', event => {
         }
         return networkResponse;
       }).catch(() => {
-        // PATCH: ignoreSearch: true memastikan PWA membuka versi offline meski ada parameter URL (seperti /?standalone=true)
+        // ignoreSearch: true memastikan PWA membuka versi offline meski ada parameter URL
         return caches.match(cacheKey, { ignoreSearch: true })
           .then(cachedRes => cachedRes || caches.match('./', { ignoreSearch: true }))
           .then(res => res || Response.error());
@@ -174,19 +174,23 @@ self.addEventListener('fetch', event => {
   } 
 
   // 4. STRATEGI STALE-WHILE-REVALIDATE UNTUK DYNAMIC/CSS (ANTI-PREMATURE TERMINATION)
-  // Mengamankan SW Lifecycle dengan memanggil waitUntil secara root-synchronous
   const cachedResPromise = caches.match(req, { ignoreSearch: true });
+  
   const networkResPromise = fetch(req).then(networkResponse => {
     if (networkResponse && networkResponse.ok && networkResponse.type !== 'opaque') {
       const clone = networkResponse.clone();
-      caches.open(CACHE_DYNAMIC).then(cache => {
-        cache.put(req, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 60));
-      });
+      
+      // [FIX] INJEKSI LIFECYCLE: Mengunci cache.put dan GC agar SW tidak mati prematur
+      event.waitUntil(
+        caches.open(CACHE_DYNAMIC).then(cache => {
+          return cache.put(req, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 60));
+        })
+      );
     }
     return networkResponse;
   }).catch(() => Response.error());
 
-  // Kunci SW agar tidak mati (Lifecycle Lock)
+  // Kunci utama untuk memastikan network request selesai
   event.waitUntil(networkResPromise);
 
   event.respondWith(
