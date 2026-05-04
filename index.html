@@ -394,14 +394,35 @@
         
         .cicil-progress { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
         
-        /* =========================================================
+                /* =========================================================
            13. EKSTRA MENU & CORETAN NYATA
         ========================================================= */
-        .coretan-nyata { position: relative; display: inline-block; color: #777777 !important; }
+        .coretan-nyata { 
+            position: relative; 
+            display: inline-block; 
+            color: #888888 !important; /* Warna teks dipudarkan sedikit */
+            text-decoration: none; 
+        }
+        
         .coretan-nyata::after {
-            content: ''; position: absolute; top: 50%; left: -5%; width: 110%; height: 2px;
-            background-color: #cccccc; 
-            transform: rotate(-2deg); border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: -2%; /* Melebihkan coretan sedikit ke luar teks */
+            width: 104%; 
+            height: 100%;
+            
+            /* KUNCI NATURAL: Menggunakan SVG tarikan tangan (Bezier Curve) 
+               Warna tinta merah (#ff3b30) dengan ujung membulat (round) */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M -2 13 Q 40 4 102 12' stroke='%23ff3b30' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            /* Tinta sedikit tembus pandang agar teks di bawahnya terbaca */
+            opacity: 0.75; 
+            
+            pointer-events: none; 
         }
         
         .extra-btn { padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: transform 0.15s ease, opacity 0.2s; background: rgba(0,0,0,0.3); }
