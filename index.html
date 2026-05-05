@@ -2960,7 +2960,7 @@
         if (ModeEkstraAktif === 'spinjam' && dataExt.principal > 0) teksPinjamanAwal = `- Uang Cair (Pinjaman) : *Rp ${dataExt.principal.toLocaleString('id-ID')}*\n- Total Tagihan Global : *Rp ${dataExt.amount.toLocaleString('id-ID')}*`;
         
         let keteranganBarang = ''; if (dataExt.catatan) keteranganBarang = ` (${dataExt.catatan})`; else { const extractedOuter = Utils.extractNameAndNote(dataExt.nama); if(extractedOuter.note) keteranganBarang = ` (${extractedOuter.note})`; }
-        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor} dari total${keteranganBarang} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
+        const pesan = `Ini adalah pesan otomatis, bahwa Anda memiliki tagihan ${jenis} ${teksTenor} dari total tenor${keteranganBarang} yang tercatat pada sistem kami.\n\n📌 *RINCIAN TAGIHAN:*\n- Jatuh Tempo : *${tglJatuhTempo}*\n${teksPinjamanAwal}\n- Tagihan Bulan Ini : *Rp ${tagihanBulanIni.toLocaleString('id-ID')}*\n\n💡 *INFORMASI SALDO:*\nSisa total tagihan Anda saat ini adalah *Rp ${sisaSekarang.toLocaleString('id-ID')}*.\nJika Anda melakukan pembayaran untuk tagihan bulan ini, maka sisa tagihan global Anda akan tersisa *Rp ${sisaSetelahBayar.toLocaleString('id-ID')}*.`;
         
         window.open(`https://wa.me/${noWA}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
