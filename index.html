@@ -1021,7 +1021,7 @@
     // 1. PENGATURAN AWAL & VARIABEL GLOBAL (STATE MANAGEMENT)
     // =========================================================
     const APP_VERSION = "4.0.1"; // Versi Enterprise Refactored
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycby9J8Sf7ERLcZgMopDuv_8OiEysLiv37wT_hDCSKdOr92pWAKlCyEYGYDb_Z2oroiQY/exec";
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwmfu0841-iLYSjCb5-2lebDFeG11tONTcCLxZFbQXTx2PTzXXjQBMtPXkSDY9uv3dC/exec";
     
     try {
         if ('serviceWorker' in navigator) {
@@ -1941,7 +1941,7 @@
     function clearSearch() { document.getElementById('rekap-search').value = ''; limitRekapIn = 15; limitRekapOut = 15; document.getElementById('list-income').scrollTop = 0; document.getElementById('list-expense').scrollTop = 0; updateRekap(); }
     function loadMoreRekap(tipe) { if (tipe === 'in') limitRekapIn += 15; else limitRekapOut += 15; updateRekap(); }
 
-    function updateRekap(isEkstraUpdate = false) {
+        function updateRekap(isEkstraUpdate = false) {
         const startEl = document.getElementById('rekap-start-date'), endEl = document.getElementById('rekap-end-date'); if(!startEl || !endEl) return;
         const tglStart = startEl.dataset.rawDate || '2000-01-01', tglEnd = endEl.dataset.rawDate || '2100-01-01';
         let rawInput = document.getElementById('rekap-search').value, kunciRaw = rawInput.replace(/[*(+)\\]/g, ''); 
@@ -1972,7 +1972,9 @@
 
             kunciRaw = kunciRaw.replace(/(\b\d+)(k|rb)\b/gi, (m, p1) => p1 + "000");
             const kwLower = kunciRaw.toLowerCase();
-            if (kwLower.includes('debit')) { filterType = 'income'; kunciRaw = kunciRaw.replace(/debit/ig, ' '); } else if (kwLower.includes('kredit')) { filterType = 'expense'; kunciRaw = kunciRaw.replace(/kredit/ig, ' '); } else if (kwLower.includes('mutasi')) { filterType = 'mutations'; kunciRaw = kunciRaw.replace(/mutasi/ig, ' '); }
+            if (/\b(deb|debit)\b/.test(kwLower)) { filterType = 'income'; kunciRaw = kunciRaw.replace(/\b(deb|debit)\b/ig, ' '); } 
+            else if (/\b(kre|kredit)\b/.test(kwLower)) { filterType = 'expense'; kunciRaw = kunciRaw.replace(/\b(kre|kredit)\b/ig, ' '); } 
+            else if (/\b(mut|mutasi|tf|transfer)\b/.test(kwLower)) { filterType = 'mutations'; kunciRaw = kunciRaw.replace(/\b(mut|mutasi|tf|transfer)\b/ig, ' '); }
             searchTerms = kunciRaw.toLowerCase().split(' ').filter(t => t.trim() !== '');
         }
 
@@ -1988,8 +1990,20 @@
             
             if (isSearching) {
                 if (exactMatch && !combinedStr.includes(exactMatch)) return null;
-                const hasAlias = (aliasArr) => searchTerms.some(t => aliasArr.includes(t));
-                if ((hasAlias(['shopee']) && (descNorm.includes('spaylater') || descNorm.includes('spinjam'))) || (hasAlias(['spaylater']) && descNorm.includes('cicilan spaylater')) || (hasAlias(['spinjam']) && descNorm.includes('spinjam')) || (hasAlias(['titip', 'titipan']) && (descNorm.includes('titipan dari') || descNorm.includes('kembalikan titipan'))) || (hasAlias(['tagihan']) && descNorm.includes('bayar tagihan')) || (hasAlias(['hutang']) && (descNorm.includes('pinjaman dari') || descNorm.includes('bayar hutang ke'))) || (hasAlias(['piutang']) && (descNorm.includes('pinjaman untuk') || descNorm.includes('pembayaran dari')))) { extraAliasMatch = true; }
+                const hasAlias = (aliasArr) => searchTerms.some(t => aliasArr.some(alias => alias.includes(t)));
+                if (
+                    (hasAlias(['shopee']) && (descNorm.includes('spaylater') || descNorm.includes('spinjam'))) || 
+                    (hasAlias(['spaylater']) && descNorm.includes('cicilan spaylater')) || 
+                    (hasAlias(['spinjam']) && descNorm.includes('spinjam')) || 
+                    (hasAlias(['titip', 'titipan']) && (descNorm.includes('titipan dari') || descNorm.includes('kembalikan titipan'))) || 
+                    (hasAlias(['tagihan']) && descNorm.includes('bayar tagihan')) || 
+                    (hasAlias(['hutang']) && (descNorm.includes('pinjaman dari') || descNorm.includes('bayar hutang ke'))) || 
+                    (hasAlias(['piutang']) && (descNorm.includes('pinjaman untuk') || descNorm.includes('pembayaran dari'))) || 
+                    (hasAlias(['ewallet']) && combinedStr.includes('e-wallet')) || 
+                    (hasAlias(['plo', 'plot', 'anggaran']) && plotId !== "") ||
+                    (hasAlias(['pengingat']) && (descNorm.includes('bayar tagihan') || descNorm.includes('kembalikan titipan'))) ||
+                    (hasAlias(['rutin', 'bulanan', 'tahunan']) && descNorm.includes('[siklus:'))
+                ) { extraAliasMatch = true; }
 
                 if (!extraAliasMatch) {
                     if (rawInput.toLowerCase().includes('hari ini') && date === todayStr) extraAliasMatch = true;
@@ -2037,6 +2051,79 @@
         document.getElementById('load-more-out-container').innerHTML = dataKeluarArr.length > limitRekapOut ? `<button class="extra-btn" style="background:transparent; border:1px dashed var(--danger); color:var(--danger); width:100%; margin-top:10px; padding:10px;" onclick="loadMoreRekap('out')">⬇️ MUAT LEBIH BANYAK (${dataKeluarArr.length - limitRekapOut})</button>` : '';
         if(!kunciRaw && !isEkstraUpdate) { elMasuk.scrollTop = scrollIn; elKeluar.scrollTop = scrollOut; }
 
+        // =======================================================
+        // TAMBAHAN KODE: SMART LIVE SUMMARY (5 SKENARIO ADAPTIF)
+        // =======================================================
+        let summaryBox = document.getElementById('search-live-summary');
+        if (!summaryBox) {
+            summaryBox = document.createElement('div');
+            summaryBox.id = 'search-live-summary';
+            summaryBox.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: slideDownGlass 0.2s ease-out;";
+            const rekapPage = document.getElementById('rekap');
+            const searchFormGroup = document.querySelector('#rekap .form-group');
+            rekapPage.insertBefore(summaryBox, searchFormGroup.nextSibling);
+        }
+
+        if (isSearching) {
+            summaryBox.classList.remove('hidden');
+            let keyword = document.getElementById('rekap-search').value.trim().toLowerCase();
+            let htmlKonten = '';
+            
+            let matchedPlot = null;
+            if (keyword.length >= 3) { matchedPlot = AppState.db.plots.find(p => p.name.toLowerCase().includes(keyword)); }
+
+            let totalTrx = dataMasukArr.length + dataKeluarArr.length;
+            let totalVolumeMutasi = dataKeluarArr.filter(item => item.type === 'mutations').reduce((sum, item) => sum + item.amount, 0);
+            let isMurniMutasi = (hitungMasukBulanIni === 0 && hitungKeluarBulanIni === 0 && totalVolumeMutasi > 0);
+
+            if (matchedPlot) {
+                // SKENARIO 2: PLOT ANGGARAN
+                let targetPlot = matchedPlot.target;
+                let terpakaiPlot = dataKeluarArr.filter(e => e.plotId === matchedPlot.id).reduce((sum, e) => sum + e.amount, 0);
+                let selisihPlot = targetPlot - terpakaiPlot;
+                let warnaSelisih = selisihPlot >= 0 ? 'var(--wa-green)' : 'var(--danger)';
+                let labelSelisih = selisihPlot >= 0 ? 'SISA ANGGARAN' : 'OVER BUDGET';
+                
+                htmlKonten = `
+                    <div style="text-align:left; color:var(--wa-blue); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TARGET PLOT</small>${Utils.formatRp(targetPlot)}</div>
+                    <div style="text-align:center; color:${warnaSelisih}; flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">${labelSelisih}</small>${Utils.formatRp(Math.abs(selisihPlot))}</div>
+                    <div style="text-align:right; color:var(--danger); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TERPAKAI</small>${Utils.formatRp(terpakaiPlot)}</div>
+                `;
+            } else if (isMurniMutasi || filterType === 'mutations') {
+                // SKENARIO 5: MURNI MUTASI
+                htmlKonten = `
+                    <div style="text-align:left; color:var(--text-light); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">JML TRANSAKSI</small>${totalTrx} Kali</div>
+                    <div style="text-align:right; color:var(--text-light); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">VOLUME MUTASI</small>${Utils.formatRp(totalVolumeMutasi)}</div>
+                `;
+            } else if (hitungMasukBulanIni > 0 && hitungKeluarBulanIni === 0) {
+                // SKENARIO 4: MURNI PEMASUKAN
+                htmlKonten = `
+                    <div style="text-align:left; color:var(--wa-green); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TOTAL MASUK</small>${Utils.formatRp(hitungMasukBulanIni)}</div>
+                    <div style="text-align:right; color:var(--text-light); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">JML TRANSAKSI</small>${totalTrx} Kali</div>
+                `;
+            } else if (hitungMasukBulanIni === 0 && hitungKeluarBulanIni > 0) {
+                // SKENARIO 3: MURNI PENGELUARAN
+                htmlKonten = `
+                    <div style="text-align:left; color:var(--text-light); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">JML TRANSAKSI</small>${totalTrx} Kali</div>
+                    <div style="text-align:right; color:var(--danger); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TOTAL KELUAR</small>${Utils.formatRp(hitungKeluarBulanIni)}</div>
+                `;
+            } else if (totalTrx > 0) {
+                // SKENARIO 1: CAMPURAN (DOMPET / EKSTRA)
+                let selisih = hitungMasukBulanIni - hitungKeluarBulanIni;
+                let warnaSelisih = selisih >= 0 ? 'var(--wa-green)' : 'var(--danger)';
+                htmlKonten = `
+                    <div style="text-align:left; color:var(--wa-green); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TOTAL MASUK</small>${Utils.formatRp(hitungMasukBulanIni)}</div>
+                    <div style="text-align:center; color:${warnaSelisih}; flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">SELISIH KAS</small>${Utils.formatRp(selisih)}</div>
+                    <div style="text-align:right; color:var(--danger); flex:1;"><small style="font-size:8px; font-weight:800; display:block; margin-bottom:2px;">TOTAL KELUAR</small>${Utils.formatRp(hitungKeluarBulanIni)}</div>
+                `;
+            } else {
+                htmlKonten = `<div style="text-align:center; color:var(--text-muted); flex:1; font-size:10px;">Tidak ada transaksi yang cocok.</div>`;
+            }
+            summaryBox.innerHTML = htmlKonten;
+        } else {
+            if (summaryBox) summaryBox.classList.add('hidden');
+        }
+
         const sTunai = getSaldoDompet('Tunai'), sBank = getSaldoDompet('Bank'), sEwal = getSaldoDompet('e-Wallet'), sDarurat1 = getSaldoDompet('Dana Darurat'), sDarurat2 = getSaldoDompet('Dana Darurat 🔒');
         const sTotal = sTunai + sBank + sEwal + sDarurat1 + sDarurat2;
 
@@ -2058,69 +2145,6 @@
 
         AppState.prevBalances = { total: sTotal, in: hitungMasukBulanIni, out: hitungKeluarBulanIni, tunai: sTunai, bank: sBank, ewal: sEwal, darurat1: sDarurat1, darurat2: sDarurat2 };
         AppState.grafikSaatIni = { tunai: sTunai, bank: sBank, ewal: sEwal, darurat1: sDarurat1, darurat2: sDarurat2, visibleExpenses: visibleExp };
-    }
-    
-    function openChartModal() { 
-        tutupSemuaMenuDrop(); document.getElementById('chart-modal').classList.remove('hidden'); document.body.classList.add('modal-open'); 
-        if (chartRenderFrameId) cancelAnimationFrame(chartRenderFrameId);
-        chartRenderFrameId = requestAnimationFrame(() => renderGrafik()); 
-    }
-    
-    function closeChartModal() { 
-        if (chartRenderFrameId) cancelAnimationFrame(chartRenderFrameId);
-        if (AppState.charts.arusKas instanceof Chart) { AppState.charts.arusKas.destroy(); AppState.charts.arusKas = null; }
-        if (AppState.charts.portofolio instanceof Chart) { AppState.charts.portofolio.destroy(); AppState.charts.portofolio = null; }
-        tutupModalAman('chart-modal'); 
-    }
-
-    function getDynamicColor(index) {
-        const brightColors = ['#FF6B6B', '#4ECDC4', '#C7F464', '#FFE66D', '#FFD166', '#EF476F', '#118AB2', '#073B4C', '#A05195', '#F15BB5', '#00F5D4', '#9B5DE5', '#FEE440', '#00BBF9', '#F1948A', '#8338EC', '#3A86FF', '#FF006E', '#FFA69E', '#86BBD8', '#2F4858', '#F6AE2D', '#F26419', '#33658A', '#820263', '#D90368', '#00CC66', '#E2C044', '#5BC0BE', '#E55934'];
-        return brightColors[index % brightColors.length];
-    }
-
-    function renderGrafik() {
-        chartRenderFrameId = null; const d = AppState.grafikSaatIni;
-        if (AppState.charts.arusKas instanceof Chart) AppState.charts.arusKas.destroy();
-        if (AppState.charts.portofolio instanceof Chart) AppState.charts.portofolio.destroy();
-        
-        let pengeluaranMap = {}, totalKeluar = 0;
-        d.visibleExpenses.forEach(e => {
-            let pName = e.desc; if (e.plotId) { const plotObj = AppState.db.plots.find(p => p.id === e.plotId); if (plotObj) pName = plotObj.name; }
-            if (!pengeluaranMap[pName]) pengeluaranMap[pName] = 0;
-            pengeluaranMap[pName] += e.amount; totalKeluar += e.amount;
-        });
-        
-        let arrayPengeluaran = []; for (let key in pengeluaranMap) arrayPengeluaran.push({ label: key, value: Math.max(0, pengeluaranMap[key]) });
-        arrayPengeluaran.sort((a, b) => b.value - a.value);
-
-        let labelsRinci = [], dataRinci = [], colorRinci = [];
-        arrayPengeluaran.forEach((item, index) => { labelsRinci.push(item.label); dataRinci.push(item.value); colorRinci.push(getDynamicColor(index)); });
-        
-        const pengeluaranKosong = totalKeluar === 0;
-        if (pengeluaranKosong) { labelsRinci = ['Kosong']; dataRinci = [1]; colorRinci = ['#333333']; }
-        
-        AppState.charts.arusKas = new Chart(document.getElementById('cashChart').getContext('2d'), { 
-            type: 'doughnut', data: { labels: labelsRinci, datasets: [{ data: dataRinci, backgroundColor: colorRinci, borderWidth: 3, borderColor: '#151515' }] }, 
-            options: { aspectRatio: 1.5, cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled: !pengeluaranKosong } }, animation: { animateScale: true, animateRotate: true, duration: 600 } } 
-        });
-
-        const customLegendContainer = document.getElementById('custom-legend'); customLegendContainer.innerHTML = '';
-        if (!pengeluaranKosong) {
-            let htmlLegend = '';
-            arrayPengeluaran.forEach((item, index) => {
-                const isLongText = item.label.length > 16, runningClass = isLongText ? 'running-text' : '';
-                htmlLegend += `<div class="custom-legend-item"><div class="legend-color-box" style="background-color: ${colorRinci[index]};"></div><div class="legend-label-container"><span class="legend-label-text ${runningClass}">${Utils.amanHTML(item.label)}</span></div><div class="legend-value">${Utils.formatRp(item.value)}</div></div>`;
-            });
-            customLegendContainer.innerHTML = htmlLegend; customLegendContainer.style.display = 'block';
-        } else { customLegendContainer.style.display = 'none'; }
-        
-        const totalTersedia = Math.max(d.tunai, 0) + Math.max(d.bank, 0) + Math.max(d.ewal, 0) + Math.max(d.darurat1, 0) + Math.max(d.darurat2, 0); 
-        const portKosong = totalTersedia <= 0;
-        
-        AppState.charts.portofolio = new Chart(document.getElementById('portChart').getContext('2d'), { 
-            type: 'doughnut', data: { labels: portKosong ? ['Kosong'] : ['Tunai', 'Bank', 'e-Wallet', 'Dana Darurat', 'Dana Darurat 🔒'], datasets: [{ data: portKosong ? [1] : [Math.max(d.tunai, 0), Math.max(d.bank, 0), Math.max(d.ewal, 0), Math.max(d.darurat1, 0), Math.max(d.darurat2, 0)], backgroundColor: portKosong ? ['#333333'] : ['#2ecc71', '#3A86FF', '#9B5DE5', '#F26419', '#ff3b30'], borderWidth: 3, borderColor: '#151515' }] }, 
-            options: { aspectRatio: 1.5, cutout: '70%', plugins: { legend: { display: !portKosong, position: 'right', labels: { color: '#cccccc', font: { size: 10, family: 'Montserrat' }, boxWidth: 12 } }, tooltip: { enabled: !portKosong } }, animation: { animateScale: true, animateRotate: true, duration: 600 } } 
-        });
     }
 
     // =========================================================
