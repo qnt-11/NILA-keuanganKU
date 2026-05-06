@@ -1,10 +1,10 @@
 /**
  * SERVICE WORKER uang famBARLA (ENTERPRISE SECURITY & SMART CACHE)
- * Versi 4.0.2 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
+ * Versi 5.0 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
  * Arsitektur: Synchronous WaitUntil SWR, Promise-Queued Garbage Collector, & Anti-Opaque
  */
 
-const APP_VERSION = '4.0.2'; 
+const APP_VERSION = '5.0'; 
 const CACHE_PREFIX = 'uang-fambarla-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
