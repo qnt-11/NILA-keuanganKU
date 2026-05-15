@@ -1,14 +1,9 @@
-/**
- * SERVICE WORKER uang famBARLA (ENTERPRISE SECURITY & SMART CACHE)
- * Versi 5.7 (MASTERPIECE EDITION - ENTERPRISE PATCHED)
- * Arsitektur: Synchronous WaitUntil SWR, Promise-Queued Garbage Collector, & Anti-Opaque
- */
-
-const APP_VERSION = '5.7'; 
+const APP_VERSION = '5.8';
 const CACHE_PREFIX = 'uang-fambarla-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
 
+// Daftar aset inti yang wajib tersedia saat Offline
 const staticAssets = [
   './',
   './index.html',
@@ -19,9 +14,12 @@ const staticAssets = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
-// Antrean Promise Absolut untuk mematikan Creeping Cache Leak
+// =========================================================
+// 1. MANAJEMEN MEMORI (GARBAGE COLLECTOR)
+// =========================================================
 let gcQueue = Promise.resolve();
 
+// Membatasi ukuran cache dinamis agar memori HP tidak penuh
 const limitCacheSize = (name, size) => {
   gcQueue = gcQueue.then(() => {
     return caches.open(name).then(cache => {
@@ -32,30 +30,34 @@ const limitCacheSize = (name, size) => {
         }
       });
     });
-  }).catch(err => console.warn('[SW] GC Terganggu:', err));
+  }).catch(err => console.warn('[SW] Pembersihan Memori Gagal:', err));
 };
 
+// =========================================================
+// 2. FASE INSTALASI (PRE-CACHING)
+// =========================================================
 self.addEventListener('install', event => {
-  self.skipWaiting(); 
+  self.skipWaiting(); // Memaksa SW baru untuk segera mengambil alih
   event.waitUntil(
     caches.open(CACHE_STATIC).then(cache => {
+      console.log('[SW] Menyimpan aset statis...');
       return Promise.all(
         staticAssets.map(asset => {
-          // Fallback ke no-cors jika CORS ketat ditolak oleh CDN untuk mencegah Offline DoS
+          // Menangani masalah CORS pada CDN (Chart.js & SheetJS)
           const reqOpt = asset.startsWith('http') ? { mode: 'cors', credentials: 'omit' } : {};
           return fetch(asset, reqOpt)
             .then(response => {
               if (response.ok && response.type !== 'opaque') {
-                return cache.put(asset, response); 
+                return cache.put(asset, response);
               }
-              throw new Error("Opaque atau Non-OK");
+              throw new Error("Respons Opaque atau Non-OK");
             })
             .catch(() => {
-              // Jika CORS gagal, coba bypass agar aplikasi tetap bisa offline (tanpa cache dinamis)
+              // Mode darurat (no-cors) jika CDN memblokir, agar app tetap bisa offline
               if (asset.startsWith('http')) {
                 return fetch(asset, { mode: 'no-cors' })
                   .then(fallbackRes => cache.put(asset, fallbackRes))
-                  .catch(() => console.warn('[SW] Aset statis gagal di-cache:', asset));
+                  .catch(() => console.warn('[SW] Aset CDN gagal di-cache:', asset));
               }
             });
         })
@@ -64,14 +66,18 @@ self.addEventListener('install', event => {
   );
 });
 
+// =========================================================
+// 3. FASE AKTIVASI (MENGHAPUS CACHE VERSI LAMA)
+// =========================================================
 self.addEventListener('activate', event => {
-  self.clients.claim(); 
+  self.clients.claim();
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys.map(key => {
+          // Hapus cache yang depannya 'uang-fambarla-' tapi bukan versi saat ini
           if (key.startsWith(CACHE_PREFIX) && key !== CACHE_STATIC && key !== CACHE_DYNAMIC) {
-            console.log('[SW] Melakukan Garbage Collection (Purge):', key);
+            console.log('[SW] Menghapus cache versi lama:', key);
             return caches.delete(key);
           }
         })
@@ -80,6 +86,7 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Mendengarkan sinyal hapus semua data dari index.html (Prompt Clear Data)
 self.addEventListener('message', event => {
   if (event.data && event.data.action === 'CLEAR_CACHE') {
     event.waitUntil(
@@ -90,24 +97,19 @@ self.addEventListener('message', event => {
   }
 });
 
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-cloud-upload') {
-    console.log('[SW] Sinyal internet terdeteksi. Memulai Background Sync ke Cloud...');
-    event.waitUntil(Promise.resolve()); // Placeholder Enterprise Phase 2
-  }
-});
-
 // =========================================================
-// INTERCEPTOR JARINGAN & CACHE STRATEGY (DEADLOCK FREE)
+// 4. INTERSEPTOR JARINGAN (STRATEGI PENGAMBILAN DATA)
 // =========================================================
 self.addEventListener('fetch', event => {
   const req = event.request;
   const reqUrl = new URL(req.url);
 
+  // Abaikan permintaan yang bukan GET atau bukan protokol HTTP/HTTPS
   if (req.method !== 'GET' || !reqUrl.protocol.startsWith('http') || reqUrl.pathname.endsWith('sw.js')) return;
 
-  // Zero-Cache untuk Database Engine Cloud
-  if (reqUrl.hostname.includes('script.google')) {
+  // STRATEGI 1: BYPASS GOOGLE CLOUD (Wajib Network-Only)
+  // Mencegah error gagal sinkronisasi saat Load/Upload Cloud
+  if (reqUrl.hostname.includes('script.google.com')) {
     event.respondWith(fetch(req).catch(() => Response.error()));
     return;
   }
@@ -115,27 +117,33 @@ self.addEventListener('fetch', event => {
   const isHtmlRequest = req.mode === 'navigate' || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   const cacheKey = isHtmlRequest ? './index.html' : req;
 
-  // 1. STRATEGI NETWORK-FIRST UNTUK HTML
+  // STRATEGI 2: STALE-WHILE-REVALIDATE UNTUK HTML (Offline-First Sejati)
   if (isHtmlRequest) {
     event.respondWith(
-      fetch(req).then(networkResponse => {
-        if (networkResponse && networkResponse.ok) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_STATIC).then(cache => cache.put(cacheKey, clone));
-        }
-        return networkResponse;
-      }).catch(() => {
-        // ignoreSearch: true memastikan PWA membuka versi offline meski ada parameter URL
-        return caches.match(cacheKey, { ignoreSearch: true })
-          .then(cachedRes => cachedRes || caches.match('./', { ignoreSearch: true }))
-          .then(res => res || Response.error());
+      caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
+        // Ambil pembaruan dari internet secara diam-diam di latar belakang
+        const networkFetch = fetch(req).then(networkResponse => {
+          if (networkResponse && networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_STATIC).then(cache => cache.put(cacheKey, clone));
+          }
+          return networkResponse;
+        }).catch(() => {
+          console.log('[SW] Anda sedang Offline. Menggunakan HTML dari Cache.');
+        });
+
+        // Mengunci proses agar Service Worker tidak mati sebelum fetch selesai
+        event.waitUntil(networkFetch);
+
+        // Langsung tampilkan cache jika ada, jika tidak, tunggu hasil download dari internet
+        return cachedResponse || networkFetch || caches.match('./', { ignoreSearch: true });
       })
     );
     return;
   }
 
-  // 2. STRATEGI CACHE-FIRST UNTUK FONT WOFF2
-  if (reqUrl.hostname === 'fonts.gstatic.com') {
+  // STRATEGI 3: CACHE-FIRST UNTUK GOOGLE FONTS
+  if (reqUrl.hostname === 'fonts.gstatic.com' || reqUrl.hostname === 'fonts.googleapis.com') {
     event.respondWith(
       caches.match(req).then(cachedRes => {
         return cachedRes || fetch(req).then(networkRes => {
@@ -150,14 +158,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Identifikasi Aset
+  // Identifikasi aset statis yang didaftarkan di atas
   const isLocalStatic = staticAssets.some(asset => {
     if (asset.startsWith('http')) return false;
     return reqUrl.pathname === new URL(asset, self.location.href).pathname;
   });
   const isCDNStatic = staticAssets.some(asset => asset.startsWith('http') && reqUrl.href === asset);
 
-  // 3. STRATEGI CACHE-FIRST UNTUK STATIC ASSETS
+  // STRATEGI 4: CACHE-FIRST UNTUK ASET STATIS (Gambar, JS, CSS Utama)
   if (isLocalStatic || isCDNStatic) {
     event.respondWith(
       caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
@@ -173,24 +181,20 @@ self.addEventListener('fetch', event => {
     return;
   } 
 
-  // 4. STRATEGI STALE-WHILE-REVALIDATE UNTUK DYNAMIC/CSS (ANTI-PREMATURE TERMINATION)
+  // STRATEGI 5: STALE-WHILE-REVALIDATE UNTUK ASET DINAMIS LAINNYA
   const cachedResPromise = caches.match(req, { ignoreSearch: true });
-  
   const networkResPromise = fetch(req).then(networkResponse => {
     if (networkResponse && networkResponse.ok && networkResponse.type !== 'opaque') {
       const clone = networkResponse.clone();
-      
-      // [FIX] INJEKSI LIFECYCLE: Mengunci cache.put dan GC agar SW tidak mati prematur
       event.waitUntil(
         caches.open(CACHE_DYNAMIC).then(cache => {
-          return cache.put(req, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 60));
+          return cache.put(req, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 50));
         })
       );
     }
     return networkResponse;
   }).catch(() => Response.error());
 
-  // Kunci utama untuk memastikan network request selesai
   event.waitUntil(networkResPromise);
 
   event.respondWith(
